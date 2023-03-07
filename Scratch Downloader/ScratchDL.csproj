@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>Scratch_Downloader</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Data Types\**" />
+    <EmbeddedResource Remove="Data Types\**" />
+    <None Remove="Data Types\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ScratchAPI.NET\ScratchAPI.NET.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Utilities.cs">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </Compile>
+  </ItemGroup>
+
+</Project>
