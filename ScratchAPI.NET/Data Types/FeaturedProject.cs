@@ -1,4 +1,4 @@
-﻿snamespace Scratch_Downloader
+﻿namespace Scratch_Downloader
 {
     public record class FeaturedProject(
         string creator,
