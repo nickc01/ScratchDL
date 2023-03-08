@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Scratch_Downloader.Options.Base;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Scratch_Downloader.Options
@@ -15,11 +13,11 @@ namespace Scratch_Downloader.Options
 
         public override async Task<bool> Run(ScratchAPI accessor)
         {
-            var directory = Utilities.GetDirectory();
-            var projects = Utilities.GetStringFromConsole("Enter the project URL or ID to download (or multiple seperated by commas)").Split(',', ' ');
-            var downloadComments = Utilities.GetCommentDownloadOption();
+            DirectoryInfo directory = Utilities.GetDirectory();
+            string[] projects = Utilities.GetStringFromConsole("Enter the project URL or ID to download (or multiple seperated by commas)").Split(',', ' ');
+            bool downloadComments = Utilities.GetCommentDownloadOption();
 
-            foreach (var project in projects)
+            foreach (string project in projects)
             {
                 await DownloadProjectTask(accessor, project, directory, downloadComments);
             }
@@ -28,19 +26,33 @@ namespace Scratch_Downloader.Options
 
         public static async Task DownloadProjectTask(ScratchAPI accessor, string project, DirectoryInfo directory, bool downloadComments)
         {
-            var index = project.IndexOf("/projects/");
+            int index = project.IndexOf("/projects/");
             if (index > -1)
             {
                 project = project[(index + 10)..^1];
             }
 
-            if (long.TryParse(project, out var projectID))
+            if (long.TryParse(project, out long projectID))
             {
-                var projectInfo = await accessor.GetProjectInfo(projectID);
-                var dir = await accessor.DownloadAndExportProject(projectID, directory);
-                if (dir != null && downloadComments && projectInfo != null)
+                Project? projectInfo = await accessor.GetProjectInfo(projectID);
+                if (projectInfo == null)
                 {
-                    await DownloadProjectComments(accessor, projectInfo.author.username, projectID, dir);
+                    Console.WriteLine($"Unable to download project {projectID}, either the project doesn't exist or the project is private");
+                    return;
+                }
+                try
+                {
+                    DirectoryInfo dir = await accessor.DownloadAndExportProject(projectID, directory);
+                    if (downloadComments && projectInfo != null)
+                    {
+                        await DownloadProjectComments(accessor, projectInfo.author.username, projectID, dir);
+                    }
+
+                    Console.WriteLine($"Successfully Downloaded Project : {projectInfo!.title}");
+                }
+                catch (ProjectDownloadException e)
+                {
+                    Console.WriteLine(e.Message);
                 }
             }
             else

@@ -3,6 +3,7 @@
 using Scratch_Downloader.Featured;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -107,48 +108,75 @@ namespace Scratch_Downloader
 				}
 			}
 
-			AddCookie("scratchlanguage", "en");
-			RemoveCookie("scratchsessionsid");
-
-			var login = new LoginRequest(username, password, csrfToken!, csrfToken!);
-
-			client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
-			client.DefaultRequestHeaders.Add("X-CSRFToken", csrfToken);
-
-			using (var loginContent = await SendPostMessage("https://scratch.mit.edu/login/", System.Text.Json.JsonSerializer.Serialize(login, DefaultOptions)))
+			try
 			{
-				if (!loginContent.IsSuccessStatusCode)
+				AddCookie("scratchlanguage", "en");
+				RemoveCookie("scratchsessionsid");
+
+				var login = new LoginRequest(username, password, csrfToken!, csrfToken!);
+
+				client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
+				client.DefaultRequestHeaders.Add("X-CSRFToken", csrfToken);
+
+				using (var loginContent = await SendPostMessage("https://scratch.mit.edu/login/", System.Text.Json.JsonSerializer.Serialize(login, DefaultOptions)))
 				{
-					throw new LoginException();
+					if (!loginContent.IsSuccessStatusCode)
+					{
+						throw new LoginException(loginContent.StatusCode, await loginContent.Content.ReadAsStringAsync());
+					}
+					foreach (var cookie in SplitCookies(loginContent.Headers.GetValues("Set-Cookie")))
+					{
+						if (cookie.Key == "scratchsessionsid")
+						{
+							AddCookie(cookie.Key, cookie.Value);
+						}
+						if (cookie.Key == "scratchcsrftoken")
+						{
+							RemoveCookie(cookie.Key);
+							csrfToken = cookie.Value;
+							AddCookie(cookie.Key, cookie.Value);
+						}
+					}
 				}
-				foreach (var cookie in SplitCookies(loginContent.Headers.GetValues("Set-Cookie")))
+
+				client.DefaultRequestHeaders.Remove("X-CSRFToken");
+				client.DefaultRequestHeaders.Add("X-CSRFToken", csrfToken);
+
+				ProfileLoginInfo = await DownloadData<LoginInfo>("https://scratch.mit.edu/session/");
+
+				if (ProfileLoginInfo == null)
 				{
-					if (cookie.Key == "scratchsessionsid")
-					{
-						AddCookie(cookie.Key, cookie.Value);
-					}
-					if (cookie.Key == "scratchcsrftoken")
-					{
-						RemoveCookie(cookie.Key);
-						csrfToken = cookie.Value;
-						AddCookie(cookie.Key, cookie.Value);
-					}
+					throw new NoInternetException();
 				}
+
+				client.DefaultRequestHeaders.Add("X-Token", ProfileLoginInfo.user.token);
+				AddCookie("permissions", JsonSerializer.Serialize(ProfileLoginInfo.permissions, DefaultOptions));
 			}
-
-			client.DefaultRequestHeaders.Remove("X-CSRFToken");
-			client.DefaultRequestHeaders.Add("X-CSRFToken", csrfToken);
-
-			ProfileLoginInfo = await DownloadData<LoginInfo>("https://scratch.mit.edu/session/");
-
-			if (ProfileLoginInfo == null)
+			catch (Exception)
 			{
-				throw new NoInternetException();
-			}
-
-			client.DefaultRequestHeaders.Add("X-Token", ProfileLoginInfo.user.token);
-			AddCookie("permissions", System.Text.Json.JsonSerializer.Serialize(ProfileLoginInfo.permissions, DefaultOptions));
+                client.DefaultRequestHeaders.Remove("X-CSRFToken");
+                client.DefaultRequestHeaders.Remove("X-Token");
+                client.DefaultRequestHeaders.Remove("X-Requested-With");
+                ClearAllCookies();
+				throw;
+            }
 		}
+
+		/// <summary>
+		/// Logs out of the currently logged in user
+		/// </summary>
+		public void Logout()
+		{
+			if (!LoggedIn)
+			{
+				return;
+			}
+			ProfileLoginInfo = null;
+            client.DefaultRequestHeaders.Remove("X-CSRFToken");
+            client.DefaultRequestHeaders.Remove("X-Token");
+            client.DefaultRequestHeaders.Remove("X-Requested-With");
+            ClearAllCookies();
+        }
 
 		async Task<HttpResponseMessage?> DownloadData(string url)
 		{
@@ -192,21 +220,22 @@ namespace Scratch_Downloader
 					//return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(await response.Content.ReadAsStringAsync());
 					//await response.Content.ReadAsStreamAsync()
 					var str = await response.Content.ReadAsStringAsync();
-					//Console.WriteLine("STR = " + str);
-					var result = System.Text.Json.JsonSerializer.Deserialize<T>(str, DefaultOptions);
-                    if (typeof(T) == typeof(Project))
+                    //Console.WriteLine("STR = " + str);
+                    //Console.WriteLine("STR = " + str);
+                    var result = System.Text.Json.JsonSerializer.Deserialize<T>(str, DefaultOptions);
+                    /*if (typeof(T) == typeof(Project))
                     {
 						Console.WriteLine($"STR RESULT of {typeof(T).FullName} = " + result?.ToString());
-					}
+					}*/
 					//Console.WriteLine("RESULT = " + result);
 					return result;
 				}
 				else
 				{
-					if (typeof(T) == typeof(Project))
+					/*if (typeof(T) == typeof(Project))
 					{
-						Console.WriteLine("FAILED RESPONSE");
-					}
+						Console.WriteLine("FAILED DOWNLOAD FROM = " + url);
+					}*/
 					return null; 
 				}
 			}
@@ -824,6 +853,11 @@ namespace Scratch_Downloader
 			return (match.Groups[1].Value, match.Groups[2].Value);
 		}
 
+		void ClearAllCookies()
+		{
+            cookieString.Clear();
+        }
+
 		void AddCookie(string key, string value)
 		{
 			if (client == null)
@@ -951,55 +985,90 @@ namespace Scratch_Downloader
 			return -1;
 		}
 
-		/// <summary>
-		/// Attempts to download a project and place the files into a directory. Returns null if the project failed to download
-		/// </summary>
-		/// <param name="projectID">The id of the projec to download</param>
-		/// <param name="outputDirectory">The output location of the project files</param>
-		/// <returns>Returns the output directory the files where placed in, or null if the project failed to download</returns>
-		public async Task<DirectoryInfo?> DownloadAndExportProject(long projectID, DirectoryInfo outputDirectory)
+        /// <summary>
+        /// Downloads a project and places the files into a directory
+        /// </summary>
+        /// <param name="projectID">The id of the project to download</param>
+        /// <param name="outputDirectory">The output location of the project files</param>
+        /// <exception cref="ProjectDownloadException">Throws if the project couldn't be downloaded. Either the project doesn't exist or the project is private</exception>
+        /// <returns>Returns the output directory the files where placed in</returns>
+        public async Task<DirectoryInfo> DownloadAndExportProject(long projectID, DirectoryInfo outputDirectory)
 		{
 			var projectInfo = await GetProjectInfo(projectID);
+
+			if (projectInfo == null)
+			{
+                throw new ProjectDownloadException(projectID, $"Unable to download project files for {projectID}. Either the project isn't public, or the project ID is invalid");
+            }
 
 			var dir = await DownloadAndExportProject(projectID, projectInfo, outputDirectory);
 			return dir;
 		}
 
-		/// <summary>
-		/// Attempts to download a project and place the files into a directory. Returns null if the project failed to download
-		/// </summary>
-		/// <param name="info">The id of the projec to download</param>
-		/// <param name="outputDirectory">The output location of the project files</param>
-		/// <returns>Returns the output directory the files where placed in, or null if the project failed to download</returns>
-		public Task<DirectoryInfo?> DownloadAndExportProject(Project info, DirectoryInfo outputDirectory)
+        /// <summary>
+        /// Downloads a project and places the files into a directory
+        /// </summary>
+        /// <param name="info">The id of the project to download</param>
+        /// <param name="outputDirectory">The output location of the project files</param>
+        /// <exception cref="ProjectDownloadException">Throws if the project couldn't be downloaded. Either the project doesn't exist or the project is private</exception>
+        /// <returns>Returns the output directory the files where placed in</returns>
+        public Task<DirectoryInfo> DownloadAndExportProject(Project info, DirectoryInfo outputDirectory)
 		{
-			return DownloadAndExportProject(info.id, info, outputDirectory);
+			if (string.IsNullOrEmpty(info.project_token))
+			{
+				return DownloadAndExportProject(info.id, outputDirectory);
+			}
+			else
+			{
+                return DownloadAndExportProject(info.id, info, outputDirectory);
+            }
 		}
 
-		async Task<DirectoryInfo?> DownloadAndExportProject(long id, Project? info, DirectoryInfo outputDirectory)
+		async Task<DirectoryInfo> DownloadAndExportProject(long id, Project info, DirectoryInfo outputDirectory)
 		{
 			var dir = await ExportProject(id, info, outputDirectory);
 
 			if (dir == null)
 			{
-				Console.WriteLine("Failed to download: " + info?.title ?? id.ToString());
-			}
+                throw new ProjectDownloadException(id, $"Unable to download project files for {info.title ?? id.ToString()}. Either the project isn't public, or the project ID is invalid");
+                //Console.WriteLine("Failed to download: " + info.title ?? id.ToString());
+            }
 
 			return dir;
 		}
 
-		public Task<DownloadedProject?> DownloadProject(Project info)
+        /// <summary>
+        /// Downloads a project from the scratch website
+        /// </summary>
+        /// <param name="info">The project to download</param>
+        /// <returns>Returns the downloaded project information</returns>
+		/// <exception cref="ProjectDownloadException">Throws if the project could not be downloaded. Either the project doesn't exist or the project is private</exception>
+        public Task<DownloadedProject> DownloadProject(Project info)
         {
-			return DownloadProject(info.id, info.author.username);
+			if (string.IsNullOrEmpty(info.project_token))
+			{
+				return DownloadProject(info.id);
+            }
+			else
+			{
+                return DownloadProject(info.id, info.author.username, info.project_token);
+            }
         }
 
-		public async Task<DownloadedProject?> DownloadProject(long projectID)
+		/// <summary>
+		/// Downloads a project from the scratch website
+		/// </summary>
+		/// <param name="projectID">The project to download</param>
+		/// <returns>Returns the downloaded project information</returns>
+		/// <exception cref="ProjectDownloadException">Throws if the project could not be downloaded. Either the project doesn't exist or the project is private</exception>
+		public async Task<DownloadedProject> DownloadProject(long projectID)
         {
 			var info = await GetProjectInfo(projectID);
 
 			if (info == null)
             {
-				return await DownloadProject(projectID, null);
+				//return await DownloadProject(projectID, null, info.project_token);
+				throw new ProjectDownloadException(projectID, $"Unable to download project files for {projectID}. Either the project isn't public, or the project ID is invalid");
             }
 			else
             {
@@ -1007,28 +1076,29 @@ namespace Scratch_Downloader
             }
 		}
 
-		async Task<DownloadedProject?> DownloadProject(long projectID, string? author)
+		async Task<DownloadedProject> DownloadProject(long projectID, string project_token, string? author)
 		{
-			var projectData = await DownloadData($"https://projects.scratch.mit.edu/{projectID}");
-
+			//Console.WriteLine("DOWNLOAD PROJECT URL = " + $"https://projects.scratch.mit.edu/{projectID}?token={project_token}");
+			var projectData = await DownloadData($"https://projects.scratch.mit.edu/{projectID}?token={project_token}");
+			//Console.WriteLine("ProjectData = " + projectData.StatusCode);
 			if (projectData == null)
             {
-				projectData = await DownloadData($"https://projects.scratch.mit.edu/internalapi/project/{projectID}/get/");
+				projectData = await DownloadData($"https://projects.scratch.mit.edu/internalapi/project/{projectID}/get/?token={project_token}");
+				//Console.WriteLine("ProjectData 2 = " + projectData.StatusCode);
 			}
 
+            if (projectData == null)
+            {
+                throw new ProjectDownloadException(projectID, $"Unable to download project files for {projectID}. Either the project isn't public, or the project ID is invalid");
+            }
 
-
-			using (projectData)
+            using (projectData)
 			{
-                if (projectData == null)
-                {
-					return null;
-                }
 				using (var content = projectData.Content)
 				{
 					var data = await content.ReadAsByteArrayAsync();
 
-					Console.WriteLine($"DOWNLOADING DATA FOR : {projectID}");
+					//Console.WriteLine($"DOWNLOADING DATA FOR : {projectID}");
 
 					var p1 = DownloadSB1Project(projectID, data, author);
 					var p2Task = DownloadSB2Project(projectID, data, author);
@@ -1058,6 +1128,11 @@ namespace Scratch_Downloader
 						project.Author = author;
                     }
 
+					if (project == null)
+					{
+                        throw new ProjectDownloadException(projectID, $"Unable to download project files for {projectID}. Either the project isn't public, or the project ID is invalid");
+                    }
+
 					return project;
 				}
 			}
@@ -1073,29 +1148,29 @@ namespace Scratch_Downloader
 			return parent.GetType().GetProperty(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(parent);
         }
 
-		public async Task<DirectoryInfo?> ExportProject(long id, Project? info, DirectoryInfo outputDirectory)
+		public async Task<DirectoryInfo?> ExportProject(long id, Project info, DirectoryInfo outputDirectory)
 		{
-			Console.WriteLine("A");
-			var filteredName = RemoveIllegalCharacters(info?.title ?? id.ToString());
-			Console.WriteLine("B");
+			//Console.WriteLine("A");
+			var filteredName = RemoveIllegalCharacters(info.title ?? id.ToString());
+			//Console.WriteLine("B");
 			if (string.IsNullOrEmpty(filteredName) || string.IsNullOrWhiteSpace(filteredName))
 			{
 				filteredName = "UNNAMED_PROJECT_" + Guid.NewGuid().ToString();
 			}
-			Console.WriteLine("C");
+			//Console.WriteLine("C");
 
 			var projectSubDir = new DirectoryInfo(PathAddBackslash(outputDirectory.FullName) + filteredName);
 
-			Console.WriteLine("D = " + projectSubDir.FullName);
+			//Console.WriteLine("D = " + projectSubDir.FullName);
 			if (projectSubDir.Exists && File.Exists(PathAddBackslash(projectSubDir.FullName) + "Info.md"))
             {
-				Console.WriteLine("E");
+				//Console.WriteLine("E");
 				return projectSubDir;
             }
 
-			Console.WriteLine("F");
-			var downloadedProject = await DownloadProject(id, info?.author.username);
-			Console.WriteLine("G");
+			//Console.WriteLine("F");
+			var downloadedProject = await DownloadProject(id, info.project_token, info.author.username);
+			//Console.WriteLine("G");
 			if (downloadedProject == null)
 			{
 				return null;
@@ -1110,7 +1185,7 @@ namespace Scratch_Downloader
 
             if (projectTemplate == null)
             {
-                using (var stream = typeof(ScratchAPI).Assembly.GetManifestResourceStream("Resources.ProjectTemplate.md"))
+                using (var stream = typeof(ScratchAPI).Assembly.GetManifestResourceStream("ScratchAPI.NET.Resources.ProjectTemplate.md"))
                 {
 					projectTemplate = new byte[stream!.Length];
 					await stream.ReadAsync(projectTemplate, 0, (int)stream.Length);
@@ -1196,8 +1271,21 @@ namespace Scratch_Downloader
 				template.Replace("%thumbnail%", "");
 			}
 
-
-			await File.WriteAllTextAsync(PathAddBackslash(projectSubDir.FullName) + "Info.md", template.ToString());
+			for (int i = 0; i < 100; i++)
+			{
+				try
+				{
+                    await File.WriteAllTextAsync(PathAddBackslash(projectSubDir.FullName) + "Info.md", template.ToString());
+                }
+				catch (Exception e)
+				{
+					if (i == 99)
+					{
+						throw;
+					}
+					continue;
+				}
+			}
 
 			return projectSubDir;
 		}
@@ -1332,7 +1420,7 @@ namespace Scratch_Downloader
 					var obj = System.Text.Json.Nodes.JsonNode.Parse(s, documentOptions: new JsonDocumentOptions() { MaxDepth = 2000 });
                     if (obj == null)
                     {
-						Console.WriteLine("NOT SB2 : " + projectID);
+						//Console.WriteLine("NOT SB2 : " + projectID);
 						return SB2BinaryProject(data);
 					}
 					return await SB2JsonProject(projectID, obj, author);
@@ -1341,7 +1429,7 @@ namespace Scratch_Downloader
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine($"C - {projectID} - {e}");
+				//Console.WriteLine($"C - {projectID} - {e}");
 				return SB2BinaryProject(data);
 			}
 		}
@@ -1384,13 +1472,13 @@ namespace Scratch_Downloader
 				}
 				catch (Exception e)
                 {
-					Console.WriteLine($"SB3 1 : {projectID} : {e}");
+					//Console.WriteLine($"SB3 1 : {projectID} : {e}");
 					return null;
                 }
 
                 if (json == null)
                 {
-					Console.WriteLine($"SB3 2 : {projectID}");
+					//Console.WriteLine($"SB3 2 : {projectID}");
 					return null;
                 }
 
@@ -1399,7 +1487,7 @@ namespace Scratch_Downloader
 
                     if (!json.RootElement.TryGetProperty("objName",out _))
                     {
-						Console.WriteLine($"SB3 3 : {projectID}");
+						//Console.WriteLine($"SB3 3 : {projectID}");
 						return null;
                     }
 					/*if (json["objName"] != null)
@@ -1555,7 +1643,7 @@ namespace Scratch_Downloader
 
 					files.Sort(SB3Project.SB3File.Comparer.Default);
 
-					Console.WriteLine($"SB3 4 : {projectID}");
+					//Console.WriteLine($"SB3 4 : {projectID}");
 					return new SB3Project(null, files);
 
 				}
@@ -1642,7 +1730,7 @@ namespace Scratch_Downloader
 							costume,
 							((string?)costume["costumeName"].AsValue()),
 							((int)costume["baseLayerID"].AsValue()),
-							((int)costume["bitmapResolution"]?.AsValue()),
+							((int?)costume["bitmapResolution"]?.AsValue()),
 							((int)costume["rotationCenterX"].AsValue()),
 							((int)costume["rotationCenterY"].AsValue())
 						));
@@ -1807,7 +1895,7 @@ namespace Scratch_Downloader
 
 			Files.Sort(SB2File.Comparer.Default);
 
-			Console.WriteLine($"SB2 1 : {projectID}");
+			//Console.WriteLine($"SB2 1 : {projectID}");
 			return new SB2Project(author, Files);
 
 		}

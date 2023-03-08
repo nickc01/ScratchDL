@@ -1,5 +1,5 @@
 ﻿using Scratch_Downloader.Enums;
-using Scratch_Downloader.Options;
+using Scratch_Downloader.Options.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -123,6 +123,7 @@ public static class Utilities
 
 	public static ProgramOption_Base PickProgramOption(IEnumerable<ProgramOption_Base> options, ProgramOption_Base? defaultOption = null)
     {
+		Console.WriteLine();
 		ProgramOption_Base[] optionsArray = options.ToArray();
 
         for (int i = 0; i < optionsArray.Length; i++)

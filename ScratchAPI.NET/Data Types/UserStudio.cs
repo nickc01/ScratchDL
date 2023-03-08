@@ -1,11 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿//using Newtonsoft.Json;
 using System;
+using System.Text.Json.Serialization;
 
 namespace Scratch_Downloader
 {
     public record class UserStudio (
 		string model,
-		[field:JsonProperty("pk")]
+		[property: JsonPropertyName("pk")]
 		long id,
 		UserStudio.Fields fields
 	)

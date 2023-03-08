@@ -1,7 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Scratch_Downloader.Options.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Scratch_Downloader.Options
@@ -13,11 +14,11 @@ namespace Scratch_Downloader.Options
 
         public override async Task<bool> Run(ScratchAPI accessor)
         {
-            var directory = Utilities.GetDirectory();
-            var studios = Utilities.GetStringFromConsole("Enter the studio URL or ID to download (or multiple seperated by commas)").Split(',', ' ');
-            var downloadComments = Utilities.GetCommentDownloadOption();
+            DirectoryInfo directory = Utilities.GetDirectory();
+            string[] studios = Utilities.GetStringFromConsole("Enter the studio URL or ID to download (or multiple seperated by commas)").Split(',', ' ');
+            bool downloadComments = Utilities.GetCommentDownloadOption();
 
-            foreach (var studio in studios)
+            foreach (string studio in studios)
             {
                 await DownloadStudioTask(accessor, studio, directory, downloadComments);
             }
@@ -26,30 +27,34 @@ namespace Scratch_Downloader.Options
 
         public static async Task DownloadStudioTask(ScratchAPI accessor, string studio, DirectoryInfo directory, bool downloadComments)
         {
-            var index = studio.IndexOf("/studios/");
+            int index = studio.IndexOf("/studios/");
             if (index > -1)
             {
-                studio = studio[(index + 10)..^1];
+                studio = studio[(index + 9)..^1];
             }
+            Console.WriteLine("Studio : " + studio);
 
-            if (long.TryParse(studio, out var studioID))
+            if (long.TryParse(studio, out long studioID))
             {
-                var info = await accessor.DownloadStudioInfo(studioID);
+                Studio? info = await accessor.DownloadStudioInfo(studioID);
 
                 if (info != null)
                 {
 
-                    var studioDirectory = directory.CreateSubdirectory(Utilities.RemoveIllegalCharacters(info.title));
+                    DirectoryInfo studioDirectory = directory.CreateSubdirectory(Utilities.RemoveIllegalCharacters(info.title));
 
-                    List<Task> downloadTasks = new List<Task>();
-                    await foreach (var project in accessor.GetProjectsInStudio(studioID))
+                    List<Task> downloadTasks = new();
+                    await foreach (StudioProject project in accessor.GetProjectsInStudio(studioID))
                     {
-                        downloadTasks.Add(DownloadProject.DownloadProjectTask(accessor,project.id.ToString(),studioDirectory,downloadComments));
+                        Console.WriteLine("Project : " + project.title);
+                        downloadTasks.Add(DownloadProject.DownloadProjectTask(accessor, project.id.ToString(), studioDirectory, downloadComments));
                     }
 
                     await Task.WhenAll(downloadTasks);
 
-                    await File.WriteAllTextAsync(Utilities.PathAddBackslash(studioDirectory.FullName) + $"studio.json", JsonConvert.SerializeObject(info, Formatting.Indented));
+                    await File.WriteAllTextAsync(Utilities.PathAddBackslash(studioDirectory.FullName) + $"studio.json", JsonSerializer.Serialize(info, new JsonSerializerOptions() { WriteIndented = true }));
+
+                    Console.WriteLine($"Downloaded Studio : {info.title}");
                 }
             }
             else

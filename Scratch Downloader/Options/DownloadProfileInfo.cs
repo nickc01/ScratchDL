@@ -1,32 +1,33 @@
-﻿using Newtonsoft.Json;
+﻿using Scratch_Downloader.Options.Base;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Scratch_Downloader.Options
 {
     public sealed class DownloadProfileInfo : ProgramOption_Base
     {
-		public override string Title => "Download Profile Info";
+        public override string Title => "Download Profile Info";
 
-		public override string Description => "Downloads profile information about a username";
+        public override string Description => "Downloads profile information about a username";
 
         public override async Task<bool> Run(ScratchAPI accessor)
         {
-			var directory = Utilities.GetDirectory();
-			var users = Utilities.GetStringFromConsole("Enter username (or multiple seperated by commas)").Split(',', ' ');
-            foreach (var user in users)
+            DirectoryInfo directory = Utilities.GetDirectory();
+            string[] users = Utilities.GetStringFromConsole("Enter username (or multiple seperated by commas)").Split(',', ' ');
+            foreach (string user in users)
             {
-				await DownloadProfileInfoOfUser(user,accessor,directory);
-			}
+                await DownloadProfileInfoOfUser(user, accessor, directory);
+            }
 
-			return false;
-		}
+            return false;
+        }
 
-		public static async Task DownloadProfileInfoOfUser(string username, ScratchAPI accessor, DirectoryInfo directory)
-		{
-			var userInfo = await accessor.GetUserInfo(username);
+        public static async Task DownloadProfileInfoOfUser(string username, ScratchAPI accessor, DirectoryInfo directory)
+        {
+            User? userInfo = await accessor.GetUserInfo(username);
 
-			await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "profile.json", JsonConvert.SerializeObject(userInfo, Formatting.Indented));
-		}
-	}
+            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "profile.json", JsonSerializer.Serialize(userInfo, new JsonSerializerOptions() { WriteIndented = true }));
+        }
+    }
 }

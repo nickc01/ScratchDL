@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
+﻿//using Newtonsoft.Json.Linq;
 using Scratch_Downloader.Enums;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -106,8 +106,23 @@ namespace Scratch_Downloader
 				//PACK MULTIPLE FILES AS A ZIP FILE, THEN DUMP TO DESTINATION
 				if (destination.Exists)
 				{
-					destination.Delete();
-				}
+                    for (int i = 0; i < 100; i++)
+                    {
+                        try
+                        {
+                            destination.Delete();
+                            break;
+                        }
+                        catch (Exception)
+                        {
+                            if (i == 99)
+                            {
+                                throw;
+                            }
+                            continue;
+                        }
+                    }
+                }
 				using (var fileStream = File.Create(destination.FullName))
 				{
 					using (var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create, false))

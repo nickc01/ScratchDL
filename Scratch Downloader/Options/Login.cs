@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Scratch_Downloader.Options.Base;
+using System;
 using System.Threading.Tasks;
 
 namespace Scratch_Downloader.Options
@@ -29,8 +30,9 @@ namespace Scratch_Downloader.Options
             {
                 Console.WriteLine("Failed to login. Make sure you are conencted to the internet");
             }
-            catch (LoginException)
+            catch (LoginException e)
             {
+                Console.WriteLine($"Status Code = {e.StatusCode}");
                 Console.WriteLine("Failed to login. Make sure you entered your credentials correctly");
             }
             catch (Exception e)

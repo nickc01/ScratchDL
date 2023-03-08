@@ -19,10 +19,26 @@ namespace Scratch_Downloader
 			{
 				destination.Directory.Create();
 			}
-			using (var fileStream = File.Create(destination.FullName))
-			{
-				fileStream.Write(Data);
-			}
+
+            for (int i = 0; i < 100; i++)
+            {
+                try
+                {
+                    using (var fileStream = File.Create(destination.FullName))
+                    {
+                        fileStream.Write(Data);
+                    }
+                    break;
+                }
+                catch (Exception)
+                {
+                    if (i == 99)
+                    {
+                        throw;
+                    }
+                    continue;
+                }
+            }
 		}
 	}
 }

@@ -1,72 +1,75 @@
-﻿using Newtonsoft.Json;
+﻿using Scratch_Downloader.Options.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Scratch_Downloader.Options
 {
     public sealed class DownloadFollowers : ProgramOption_Base
     {
-		public override string Title => "Download Followers";
+        public override string Title => "Download Followers";
 
-		public override string Description => "Downloads all users following a certain user";
+        public override string Description => "Downloads all users following a certain user";
 
         public override async Task<bool> Run(ScratchAPI accessor)
         {
-			var directory = Utilities.GetDirectory();
-			var users = Utilities.GetStringFromConsole("Enter username to get followers from (or multiple seperated by commas)").Split(',', ' ');
+            DirectoryInfo directory = Utilities.GetDirectory();
+            string[] users = Utilities.GetStringFromConsole("Enter username to get followers from (or multiple seperated by commas)").Split(',', ' ');
 
-			foreach (var user in users)
-			{
-				var userDirectory = directory.CreateSubdirectory(user);
-				await DownloadUserFollowers(user, accessor, userDirectory);
-			}
-			return false;
-		}
+            foreach (string user in users)
+            {
+                DirectoryInfo userDirectory = directory.CreateSubdirectory(Utilities.RemoveIllegalCharacters(user));
+                await DownloadUserFollowers(user, accessor, userDirectory);
+            }
+            return false;
+        }
 
-		public static async Task DownloadUserFollowers(string username, ScratchAPI accessor, DirectoryInfo directory)
-		{
-			directory = directory.CreateSubdirectory("Followers");
-			List<Task> downloadTasks = new List<Task>();
-			List<User> followers = new List<User>();
-			await foreach (var follower in accessor.GetFollowers(username))
-			{
-				followers.Add(follower);
+        public static async Task DownloadUserFollowers(string username, ScratchAPI accessor, DirectoryInfo directory)
+        {
+            directory = directory.CreateSubdirectory("Followers");
+            List<Task> downloadTasks = new();
+            List<User> followers = new();
+            await foreach (User follower in accessor.GetFollowers(username))
+            {
+                followers.Add(follower);
 
-				var subDir = directory.CreateSubdirectory(Utilities.RemoveIllegalCharacters(follower.username));
+                DirectoryInfo subDir = directory.CreateSubdirectory(Utilities.RemoveIllegalCharacters(follower.username));
 
-				async Task Downloader()
-				{
-					Console.WriteLine($"Downloading: {follower.username}");
-					var image = follower.profile.images.MaxBy(kv => int.Parse(kv.Key.Split('x')[0]));
+                async Task Downloader()
+                {
+                    Console.WriteLine($"Downloading: {follower.username}");
+                    KeyValuePair<string, string> image = follower.profile.images.MaxBy(kv => int.Parse(kv.Key.Split('x')[0]));
 
-					var imgStream = await accessor.DownloadFromURL(image.Value);
+                    Stream imgStream = await accessor.DownloadFromURL(image.Value);
 
-					using var pngFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "thumbnail.gif");
-					using var gifFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "thumbnail.png");
+                    using FileStream pngFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "thumbnail.gif");
+                    using FileStream gifFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "thumbnail.png");
 
-					await imgStream.CopyToAsync(pngFile);
+                    await imgStream.CopyToAsync(pngFile);
 
-					imgStream.Position = 0;
+                    imgStream.Position = 0;
 
-					await imgStream.CopyToAsync(gifFile);
+                    await imgStream.CopyToAsync(gifFile);
 
-					using var jsonFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "info.json");
+                    using FileStream jsonFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "info.json");
 
-					using var writer = new StreamWriter(jsonFile);
+                    using StreamWriter writer = new(jsonFile);
 
-					await writer.WriteAsync(JsonConvert.SerializeObject(follower, Formatting.Indented));
+                    await writer.WriteAsync(JsonSerializer.Serialize(follower, new JsonSerializerOptions() { WriteIndented = true }));
 
-					Console.WriteLine($"Done: {follower.username}");
-				}
+                    Console.WriteLine($"Done: {follower.username}");
+                }
 
-				downloadTasks.Add(Downloader());
-			}
-			await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "followers.json", JsonConvert.SerializeObject(followers, Formatting.Indented));
+                downloadTasks.Add(Downloader());
+            }
+            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "followers.json", JsonSerializer.Serialize(followers.OrderBy(f => f.username), new JsonSerializerOptions() { WriteIndented = true }));
 
-			await Task.WhenAll(downloadTasks);
-		}
-	}
+            await Task.WhenAll(downloadTasks);
+
+            Console.WriteLine($"Followers Downloaded : {followers.Count}");
+        }
+    }
 }

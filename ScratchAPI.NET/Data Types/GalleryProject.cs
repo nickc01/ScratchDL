@@ -1,18 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿//using Newtonsoft.Json;
 using System;
+using System.Text.Json.Serialization;
 
 namespace Scratch_Downloader
 {
     public record GalleryProject (
 		GalleryProject.Fields fields,
 		string model,
-		[field:JsonProperty("pk")] long id
+        [property: JsonPropertyName("pk")] long id
 		)
 	{
 		public record class Creator
 		(
 			string username,
-			[field:JsonProperty("pk")] long id,
+            [property: JsonPropertyName("pk")] long id,
 			string thumbnail_url,
 			bool admin
 		);

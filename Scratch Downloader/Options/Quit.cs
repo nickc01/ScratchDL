@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using Scratch_Downloader.Options.Base;
+using System.Threading.Tasks;
 
 namespace Scratch_Downloader.Options
 {
@@ -7,9 +8,9 @@ namespace Scratch_Downloader.Options
         public override string Title => "Quit";
         public override string Description => "Quits the program";
 
-        public override async Task<bool> Run(ScratchAPI accessor)
+        public override Task<bool> Run(ScratchAPI accessor)
         {
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

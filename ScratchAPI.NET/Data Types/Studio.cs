@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿//using Newtonsoft.Json;
 using System;
+using System.Text.Json.Serialization;
 
 namespace Scratch_Downloader
 {
@@ -9,7 +10,7 @@ namespace Scratch_Downloader
 		long host,
 		string description,
 		string visibility,
-		[field:JsonProperty("public")]
+		[property:JsonPropertyName("public")]
 		bool is_public,
 		bool open_to_all,
 		bool comments_allowed,
@@ -22,7 +23,7 @@ namespace Scratch_Downloader
 			DateTime modified
 		);
 
-		public Studio(UserStudio info) : this
+		/*public Studio(UserStudio info) : this
 		(
 			info.id,
 			info.fields.title,
@@ -34,6 +35,6 @@ namespace Scratch_Downloader
 			true,
 			"",
 			new History(info.fields.datetime_created,info.fields.datetime_modified)
-		) { }
+		) { }*/
 	}
 }

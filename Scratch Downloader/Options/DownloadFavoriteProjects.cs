@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
-using Scratch_Downloader.Enums;
+﻿using Scratch_Downloader.Options.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,53 +16,60 @@ namespace Scratch_Downloader.Options
 
         public override async Task<bool> Run(ScratchAPI accessor)
         {
-            var directory = Utilities.GetDirectory();
-            var users = Utilities.GetStringFromConsole("Enter username to get projects from (or multiple seperated by commas)").Split(',', ' ');
-            var downloadComments = Utilities.GetCommentDownloadOption();
+            DirectoryInfo directory = Utilities.GetDirectory();
+            string[] users = Utilities.GetStringFromConsole("Enter username to get projects from (or multiple seperated by commas)").Split(',', ' ');
+            bool downloadComments = Utilities.GetCommentDownloadOption();
 
-            foreach (var user in users)
+            foreach (string user in users)
             {
-                var userDirectory = directory.CreateSubdirectory(user);
+                DirectoryInfo userDirectory = directory.CreateSubdirectory(Utilities.RemoveIllegalCharacters(user));
                 await DownloadProjects(user, accessor, userDirectory, downloadComments);
             }
             return false;
         }
 
-		public static async Task DownloadProjects(string username, ScratchAPI accessor, DirectoryInfo directory, bool downloadComments)
-		{
-			directory = directory.CreateSubdirectory("Favorites");
-			List<Task> downloadTasks = new List<Task>();
+        public static async Task DownloadProjects(string username, ScratchAPI accessor, DirectoryInfo directory, bool downloadComments)
+        {
+            directory = directory.CreateSubdirectory("Favorites");
+            List<Task> downloadTasks = new();
 
-			List<Project> projects = new List<Project>();
+            List<Project> projects = new();
 
-			int counter = 0;
-			int downloadedCounter = 0;
-			await foreach (var favorite in accessor.GetFavoriteProjects(username))
-			{
-				Console.WriteLine($"Found Favorite = {favorite.title}-{favorite.id}");
-				counter++;
+            int counter = 0;
+            int downloadedCounter = 0;
+            await foreach (Project favorite in accessor.GetFavoriteProjects(username))
+            {
+                Console.WriteLine($"Found Favorite = {favorite.title}-{favorite.id}");
+                counter++;
 
-				async Task Download()
-				{
-					var dir = await accessor.DownloadAndExportProject(favorite, directory);
-					if (dir != null && downloadComments)
-					{
-						Interlocked.Increment(ref downloadedCounter);
-						await DownloadProjectComments(accessor, favorite.author.username, favorite.id, dir);
-					}
-				}
+                async Task Download()
+                {
+                    try
+                    {
+                        DirectoryInfo dir = await accessor.DownloadAndExportProject(favorite, directory);
+                        if (downloadComments)
+                        {
+                            _ = Interlocked.Increment(ref downloadedCounter);
+                            await DownloadProjectComments(accessor, favorite.author.username, favorite.id, dir);
+                        }
+                    }
+                    catch (ProjectDownloadException e)
+                    {
+                        Console.WriteLine(e.Message);
+                    }
+                }
 
-				downloadTasks.Add(Download());
+                downloadTasks.Add(Download());
 
-				projects.Add(favorite);
-			}
+                projects.Add(favorite);
+            }
 
-			await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "favorites.json", JsonConvert.SerializeObject(projects, Formatting.Indented));
+            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "favorites.json", JsonSerializer.Serialize(projects.OrderBy(p => p.title).ToArray(), new JsonSerializerOptions() { WriteIndented = true }));
 
-			await Task.WhenAll(downloadTasks);
+            await Task.WhenAll(downloadTasks);
 
-			Console.WriteLine($"Found Favorites : {counter}");
-			Console.WriteLine($"Downloaded Favorites : {downloadedCounter}");
-		}
-	}
+            Console.WriteLine($"Found Favorites : {counter}");
+            Console.WriteLine($"Downloaded Favorites : {downloadedCounter}");
+        }
+    }
 }
