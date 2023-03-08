@@ -1,42 +1,24 @@
-﻿//using Newtonsoft.Json;
-using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Scratch_Downloader
 {
-    public record class UserStudio (
-		string model,
-		[property: JsonPropertyName("pk")]
-		long id,
-		UserStudio.Fields fields
-	)
+    public record class UserStudio(
+        string model,
+        [property: JsonPropertyName("pk")]
+        long id,
+        UserStudio.Fields fields
+    )
     {
         public record class Fields
         (
-			int curators_count,
-			int projecters_count,
-			string title,
-			DateTime datetime_created,
-			string thumbnail_url,
-			int commenters_count,
-			DateTime datetime_modified,
-			GalleryProject.Creator owner
+            int curators_count,
+            int projecters_count,
+            string title,
+            DateTime datetime_created,
+            string thumbnail_url,
+            int commenters_count,
+            DateTime datetime_modified,
+            GalleryProject.Creator owner
         );
-
-		/*public static explicit operator Studio(StudioUser info)
-		{
-			return new StudioInfo
-			{
-				history = new Studio.History
-				{
-					created = info.fields.datetime_created,
-					modified = info.fields.datetime_modified
-				},
-				id = info.id,
-				host = info.fields.owner.id,
-				image = info.fields.thumbnail_url,
-				title = info.fields.title
-			};
-		}*/
-	}
+    }
 }

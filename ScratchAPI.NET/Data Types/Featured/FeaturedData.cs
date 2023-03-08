@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Scratch_Downloader.Featured
+﻿namespace Scratch_Downloader.Featured
 {
     public record class FeaturedData(
         List<FeaturedProject> community_newest_projects,

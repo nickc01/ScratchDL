@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Scratch_Downloader.Featured
+﻿namespace Scratch_Downloader.Featured
 {
     public record class FeaturedProject(
         string thumbnail_url,
@@ -35,7 +29,7 @@ namespace Scratch_Downloader.Featured
         long remixers_count,
         long gallery_id,
         string gallery_title
-        ) : MostRemixedProject(thumbnail_url,title,creator,type,id,love_count,remixers_count);
+        ) : MostRemixedProject(thumbnail_url, title, creator, type, id, love_count, remixers_count);
 
     public record class CuratorTopProject(
         string thumbnail_url,

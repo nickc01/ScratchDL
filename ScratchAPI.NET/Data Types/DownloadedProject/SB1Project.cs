@@ -1,24 +1,23 @@
 ﻿using Scratch_Downloader.Enums;
-using System.IO;
 
 namespace Scratch_Downloader
 {
     public class SB1Project : DownloadedProject
-	{
-		public override ProjectType Type => ProjectType.SB;
-		public byte[] Data;
+    {
+        public override ProjectType Type => ProjectType.SB;
+        public byte[] Data;
 
-		public SB1Project(string? author, byte[] data) : base(author)
+        public SB1Project(string? author, byte[] data) : base(author)
         {
-			Data = data;
+            Data = data;
         }
 
-		public override void Package(FileInfo destination)
-		{
-			if (!destination.Directory!.Exists)
-			{
-				destination.Directory.Create();
-			}
+        public override void Package(FileInfo destination)
+        {
+            if (!destination.Directory!.Exists)
+            {
+                destination.Directory.Create();
+            }
 
             for (int i = 0; i < 100; i++)
             {
@@ -39,6 +38,6 @@ namespace Scratch_Downloader
                     continue;
                 }
             }
-		}
-	}
+        }
+    }
 }

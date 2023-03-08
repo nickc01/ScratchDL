@@ -27,7 +27,7 @@ namespace Scratch_Downloader
         string project_token
     )
     {
-        public Project() : this(0, string.Empty, string.Empty, string.Empty, string.Empty, false, false, false, new Author(0, string.Empty, false, _container_.emptyDictionary, new Profile(_container_.emptyDictionary)), string.Empty, _container_.emptyDictionary, new ProjectHistory(DateTime.Now, DateTime.Now, DateTime.Now), new ProjectStats(0, 0, 0, 0), new ProjectRemix(null, null),string.Empty)
+        public Project() : this(0, string.Empty, string.Empty, string.Empty, string.Empty, false, false, false, new Author(0, string.Empty, false, _container_.emptyDictionary, new Profile(_container_.emptyDictionary)), string.Empty, _container_.emptyDictionary, new ProjectHistory(DateTime.Now, DateTime.Now, DateTime.Now), new ProjectStats(0, 0, 0, 0), new ProjectRemix(null, null), string.Empty)
         {
 
         }
@@ -66,50 +66,5 @@ namespace Scratch_Downloader
             long? parent,
             long? root
         );
-
-        /*public Project(StudioProject project) : this(
-            project.id,
-            project.title,
-            "",
-            "",
-            "visible",
-            true,
-            true,
-            true,
-            new Author
-                (
-                    project.actor_id,
-                    "",
-                    false,
-                    new Dictionary<string, string>(),
-                    new Profile
-                        (
-                            new Dictionary<string, string>()
-                        )
-                ),
-            project.image,
-            new Dictionary<string, string>(),
-            new ProjectHistory
-                (
-                    DateTime.UnixEpoch,
-                    DateTime.UnixEpoch,
-                    DateTime.UnixEpoch
-                ),
-            new ProjectStats
-                (
-                    0,
-                    0,
-                    0,
-                    0
-                ),
-            new ProjectRemix
-                (
-                    "",
-                    ""
-                ),
-                ""
-
-            )
-        { }*/
     }
 }
