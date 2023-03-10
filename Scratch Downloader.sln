@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScratchDL", "Scratch Downlo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScratchAPI.NET", "ScratchAPI.NET\ScratchAPI.NET.csproj", "{C3119048-DE4D-4883-BBB5-51AE3C9508C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScratchDL.GUI", "ScratchDL.GUI\ScratchDL.GUI.csproj", "{02464A3F-61E9-4F41-9ACD-2D2AAA54E2E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C3119048-DE4D-4883-BBB5-51AE3C9508C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3119048-DE4D-4883-BBB5-51AE3C9508C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3119048-DE4D-4883-BBB5-51AE3C9508C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02464A3F-61E9-4F41-9ACD-2D2AAA54E2E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02464A3F-61E9-4F41-9ACD-2D2AAA54E2E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02464A3F-61E9-4F41-9ACD-2D2AAA54E2E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02464A3F-61E9-4F41-9ACD-2D2AAA54E2E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
