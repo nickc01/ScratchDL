@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls.Primitives;
+using ScratchDL.GUI.Views;
 using System.Collections.Generic;
 
 namespace ScratchDL.GUI.ViewModels
@@ -32,7 +33,8 @@ namespace ScratchDL.GUI.ViewModels
 
         public void DisplayLoginWindow()
         {
-
+            var login = LoginWindow.Instance ?? new LoginWindow();
+            login.Show(MainWindow.Instance);
         }
     }
 }

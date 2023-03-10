@@ -3,11 +3,11 @@
         xmlns:vm="using:ScratchDL.GUI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="875" d:DesignHeight="450"
         x:Class="ScratchDL.GUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="ScratchDL"
-		MinWidth="800"
+		MinWidth="875"
 		MinHeight="600"
 		Background="#1f2022">
 
@@ -25,12 +25,13 @@
 			<RowDefinition></RowDefinition>
 		</Grid.RowDefinitions>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition MinWidth="375" Width="*"></ColumnDefinition>
+			<ColumnDefinition MinWidth="435" Width="*"></ColumnDefinition>
 			<ColumnDefinition Width="4"></ColumnDefinition>
-			<ColumnDefinition MinWidth="375" Width="*"></ColumnDefinition>
+			<ColumnDefinition MinWidth="435" Width="*"></ColumnDefinition>
 		</Grid.ColumnDefinitions>
 
 		<StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Spacing="10" Orientation="Horizontal">
+			<TextBlock VerticalAlignment="Center" FontSize="16" Margin="10 5 0 5">Mode:</TextBlock>
 			<ComboBox SelectedIndex="0" VerticalAlignment="Stretch">
 				<ComboBoxItem>Download all projects from current user</ComboBoxItem>
 				<ComboBoxItem>Download all shared projects from another user</ComboBoxItem>
@@ -46,7 +47,7 @@
 		
 		<StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Spacing="10" Orientation="Horizontal">
 			<TextBlock VerticalAlignment="Center">Not Logged In</TextBlock>
-			<Button FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Name="loginButton" Margin="0 0 0 0">Login</Button>
+			<Button Command="{Binding DisplayLoginWindow}" FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Name="loginButton" Margin="0 0 0 0">Login</Button>
 			<Rectangle Fill="White" Width="44"/>
 		</StackPanel>
 		<ScrollViewer Margin="0 0 0 54" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
