@@ -3,18 +3,20 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="225" d:DesignHeight="200"
+		xmlns:vm="using:ScratchDL.GUI.ViewModels"
         x:Class="ScratchDL.GUI.Views.LoginWindow"
         Title="Login"
 		Background="#1f2022"
 		MinWidth="225"
 		MinHeight="200"
 		MaxWidth="225"
-		MaxHeight="200">
+		MaxHeight="200"
+		x:DataType="vm:LoginWindowViewModel">
 	<StackPanel HorizontalAlignment="Center" Margin="10" Spacing="5">
 		<TextBlock FontSize="20">Username:</TextBlock>
-		<TextBox FontSize="17" MinWidth="200"></TextBox>
+		<TextBox Text="{CompiledBinding Username}" FontSize="17" MinWidth="200"></TextBox>
 		<TextBlock FontSize="20">Password</TextBlock>
-		<TextBox FontSize="17" PasswordChar="*" MinWidth="200"></TextBox>
-		<Button HorizontalAlignment="Center" FontSize="20">Login</Button>
+		<TextBox Text="{CompiledBinding Password}" FontSize="17" PasswordChar="*" MinWidth="200"></TextBox>
+		<Button Command="{CompiledBinding LoginCommand}" HorizontalAlignment="Center" FontSize="20">Login</Button>
 	</StackPanel>
 </Window>

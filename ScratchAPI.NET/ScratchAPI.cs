@@ -51,6 +51,8 @@ namespace Scratch_Downloader
         /// </summary>
         /// <param name="username">The username of the account to login to</param>
         /// <param name="password">The password of the account to login to</param>
+        /// <exception cref="NoInternetException">Throws if there is no internet connection</exception>
+        /// <exception cref="LoginException">Throws if there was a failure logging in</exception>
         public static async Task<ScratchAPI> Create(string username, string password)
         {
             var accessor = new ScratchAPI();

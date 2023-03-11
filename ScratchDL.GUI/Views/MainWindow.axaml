@@ -9,7 +9,8 @@
         Title="ScratchDL"
 		MinWidth="875"
 		MinHeight="600"
-		Background="#1f2022">
+		Background="#1f2022"
+		x:DataType="vm:MainWindowViewModel">
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
@@ -42,11 +43,12 @@
 				<ComboBoxItem>Download a single project</ComboBoxItem>
 				<ComboBoxItem>Download a single studio</ComboBoxItem>
 				<ComboBoxItem>Download all studios from a user</ComboBoxItem>
+				<ComboBoxItem>Scan for project metadata by user</ComboBoxItem>
 			</ComboBox>
 		</StackPanel>
 		
 		<StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Spacing="10" Orientation="Horizontal">
-			<TextBlock VerticalAlignment="Center">Not Logged In</TextBlock>
+			<TextBlock Text="{CompiledBinding LoggedInUser}" VerticalAlignment="Center"></TextBlock>
 			<Button Command="{Binding DisplayLoginWindow}" FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Name="loginButton" Margin="0 0 0 0">Login</Button>
 			<Rectangle Fill="White" Width="44"/>
 		</StackPanel>

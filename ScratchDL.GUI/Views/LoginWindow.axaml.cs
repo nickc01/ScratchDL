@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
+using ScratchDL.GUI.ViewModels;
 using System;
 
 namespace ScratchDL.GUI.Views
