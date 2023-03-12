@@ -1,5 +1,5 @@
 ﻿using ReactiveUI;
-using Scratch_Downloader;
+using ScratchDL;
 
 namespace ScratchDL.GUI.ViewModels
 {
