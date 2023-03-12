@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ScratchDL.GUI.Interfaces
+namespace ScratchDL.GUI
 {
     public interface ILoginable
     {

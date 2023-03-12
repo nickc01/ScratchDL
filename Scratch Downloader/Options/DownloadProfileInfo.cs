@@ -1,9 +1,9 @@
-﻿using Scratch_Downloader.Options.Base;
+﻿using ScratchDL.CMD.Options.Base;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader.Options
+namespace ScratchDL.CMD.Options
 {
     public sealed class DownloadProfileInfo : ProgramOption_Base
     {
@@ -27,7 +27,7 @@ namespace Scratch_Downloader.Options
         {
             User? userInfo = await accessor.GetUserInfo(username);
 
-            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "profile.json", JsonSerializer.Serialize(userInfo, new JsonSerializerOptions() { WriteIndented = true }));
+            await WriteTextToFile(Helpers.PathAddBackslash(directory.FullName) + "profile.json", JsonSerializer.Serialize(userInfo, new JsonSerializerOptions() { WriteIndented = true }));
         }
     }
 }

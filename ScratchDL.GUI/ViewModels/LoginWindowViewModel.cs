@@ -1,6 +1,5 @@
 ﻿using Avalonia.Interactivity;
 using ReactiveUI;
-using ScratchDL.GUI.Interfaces;
 using ScratchDL.GUI.Views;
 using System;
 using System.Diagnostics;

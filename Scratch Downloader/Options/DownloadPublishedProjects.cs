@@ -1,5 +1,5 @@
-﻿using Scratch_Downloader.Enums;
-using Scratch_Downloader.Options.Base;
+﻿using ScratchDL.CMD.Options.Base;
+using ScratchDL.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader.Options
+namespace ScratchDL.CMD.Options
 {
     public sealed class DownloadUserProjects : ProgramOption_Base
     {
@@ -90,7 +90,7 @@ namespace Scratch_Downloader.Options
                 counter++;
             }
 
-            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "projects.json", JsonSerializer.Serialize(foundProjects, new JsonSerializerOptions() { WriteIndented = true }));
+            await WriteTextToFile(Helpers.PathAddBackslash(directory.FullName) + "projects.json", JsonSerializer.Serialize(foundProjects, new JsonSerializerOptions() { WriteIndented = true }));
 
 
             await Task.WhenAll(downloadTasks);
@@ -124,7 +124,7 @@ namespace Scratch_Downloader.Options
 
                 await foreach (Project project in projectsEnum)
                 {
-                    if (project.author.id == userInfo.id && projects.TryAdd(project.id, project))
+                    if (project.author.id == userInfo?.id && projects.TryAdd(project.id, project))
                     {
                         _ = Interlocked.Increment(ref foundProjects);
                         listedProjects.Enqueue(project);
@@ -252,7 +252,7 @@ namespace Scratch_Downloader.Options
                 downloadTasks.Add(Download(project));
             }
 
-            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "projects.json", JsonSerializer.Serialize(listedProjects.ToArray(), new JsonSerializerOptions() { WriteIndented = true }));
+            await WriteTextToFile(Helpers.PathAddBackslash(directory.FullName) + "projects.json", JsonSerializer.Serialize(listedProjects.ToArray(), new JsonSerializerOptions() { WriteIndented = true }));
 
             await Task.WhenAll(downloadTasks);
             Console.WriteLine("Done!");

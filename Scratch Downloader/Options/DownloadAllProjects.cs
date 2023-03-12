@@ -1,4 +1,4 @@
-﻿using Scratch_Downloader.Options.Base;
+﻿using ScratchDL.CMD.Options.Base;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader.Options
+namespace ScratchDL.CMD.Options
 {
     public sealed class DownloadAllProjects : ProgramOption_Base
     {
@@ -71,7 +71,7 @@ namespace Scratch_Downloader.Options
 
             await Task.WhenAll(downloadTasks);
 
-            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "projects.json", JsonSerializer.Serialize(projects.OrderBy(p => p.title).ToArray(), new JsonSerializerOptions() { WriteIndented = true }));
+            await WriteTextToFile(Helpers.PathAddBackslash(directory.FullName) + "projects.json", JsonSerializer.Serialize(projects.OrderBy(p => p.title).ToArray(), new JsonSerializerOptions() { WriteIndented = true }));
 
             Console.WriteLine("Done downloading projects!");
         }

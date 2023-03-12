@@ -1,4 +1,4 @@
-﻿//using Newtonsoft.Json.Linq;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
 	public abstract class MetaAsset
 	{

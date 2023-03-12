@@ -1,7 +1,7 @@
-﻿using Scratch_Downloader.Options.Base;
+﻿using ScratchDL.CMD.Options.Base;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader.Options
+namespace ScratchDL.CMD.Options
 {
     public sealed class Quit : ProgramOption_Base
     {

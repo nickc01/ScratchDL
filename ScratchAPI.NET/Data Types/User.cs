@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
 	public record class User
 	(

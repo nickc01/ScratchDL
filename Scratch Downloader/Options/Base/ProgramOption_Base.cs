@@ -1,11 +1,12 @@
-﻿using System;
+﻿using ScratchDL;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader.Options.Base
+namespace ScratchDL.CMD.Options.Base
 {
     public abstract class ProgramOption_Base
     {
@@ -54,8 +55,17 @@ namespace Scratch_Downloader.Options.Base
             downloadedComments.AddRange(commentDownloads.Select(t => t.Result));
             if (downloadedComments.Count > 0)
             {
+                using (var fileStream = await Helpers.WaitTillFileAvailable(Helpers.PathAddBackslash(directory.FullName) + "comments.json",FileMode.Create,FileAccess.Write))
+                {
+                    using (var writer = new StreamWriter(fileStream))
+                    {
+                        await writer.WriteAsync(JsonSerializer.Serialize(downloadedComments, new JsonSerializerOptions() { WriteIndented = true }));
+                    }
+                }
 
-                for (int i = 0; i < 100; i++)
+
+
+                /*for (int i = 0; i < 100; i++)
                 {
                     try
                     {
@@ -70,6 +80,17 @@ namespace Scratch_Downloader.Options.Base
                         }
                         continue;
                     }
+                }*/
+            }
+        }
+
+        protected static async Task WriteTextToFile(string filePath, string contents)
+        {
+            using (var fileStream = await Helpers.WaitTillFileAvailable(filePath,FileMode.Create,FileAccess.Write))
+            {
+                using (var writer = new StreamWriter(fileStream))
+                {
+                    await writer.WriteAsync(contents);
                 }
             }
         }

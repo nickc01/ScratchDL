@@ -1,4 +1,4 @@
-﻿namespace Scratch_Downloader
+﻿namespace ScratchDL
 {
     public class SB2File
     {

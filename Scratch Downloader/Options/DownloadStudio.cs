@@ -1,11 +1,11 @@
-﻿using Scratch_Downloader.Options.Base;
+﻿using ScratchDL.CMD.Options.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader.Options
+namespace ScratchDL.CMD.Options
 {
     public sealed class DownloadStudio : ProgramOption_Base
     {
@@ -52,7 +52,7 @@ namespace Scratch_Downloader.Options
 
                     await Task.WhenAll(downloadTasks);
 
-                    await File.WriteAllTextAsync(Utilities.PathAddBackslash(studioDirectory.FullName) + $"studio.json", JsonSerializer.Serialize(info, new JsonSerializerOptions() { WriteIndented = true }));
+                    await WriteTextToFile(Helpers.PathAddBackslash(studioDirectory.FullName) + $"studio.json", JsonSerializer.Serialize(info, new JsonSerializerOptions() { WriteIndented = true }));
 
                     Console.WriteLine($"Downloaded Studio : {info.title}");
                 }

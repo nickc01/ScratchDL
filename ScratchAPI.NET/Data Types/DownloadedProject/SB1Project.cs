@@ -1,6 +1,6 @@
-﻿using Scratch_Downloader.Enums;
+﻿using ScratchDL.Enums;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
     public class SB1Project : DownloadedProject
     {
@@ -12,14 +12,19 @@ namespace Scratch_Downloader
             Data = data;
         }
 
-        public override void Package(FileInfo destination)
+        public override async Task Package(FileInfo destination)
         {
             if (!destination.Directory!.Exists)
             {
                 destination.Directory.Create();
             }
 
-            for (int i = 0; i < 100; i++)
+            using (var fileStream = await Helpers.WaitTillFileAvailable(destination.FullName,FileMode.Create,FileAccess.Write))
+            {
+                await fileStream.WriteAsync(Data);
+            }
+
+            /*for (int i = 0; i < 100; i++)
             {
                 try
                 {
@@ -37,7 +42,7 @@ namespace Scratch_Downloader
                     }
                     continue;
                 }
-            }
+            }*/
         }
     }
 }

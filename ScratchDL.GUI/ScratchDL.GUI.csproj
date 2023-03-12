@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ScratchAPI.NET\ScratchAPI.NET.csproj" />
+    <ProjectReference Include="..\ScratchAPI.NET\ScratchDL.csproj" />
   </ItemGroup>
 
   <ItemGroup>

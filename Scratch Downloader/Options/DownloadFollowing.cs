@@ -1,4 +1,4 @@
-﻿using Scratch_Downloader.Options.Base;
+﻿using ScratchDL.CMD.Options.Base;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader.Options
+namespace ScratchDL.CMD.Options
 {
     public sealed class DownloadFollowing : ProgramOption_Base
     {
@@ -43,18 +43,20 @@ namespace Scratch_Downloader.Options
                     Console.WriteLine($"Downloading: {followingUser.username}");
                     KeyValuePair<string, string> image = followingUser.profile.images.MaxBy(kv => int.Parse(kv.Key.Split('x')[0]));
 
-                    Stream imgStream = await accessor.DownloadFromURL(image.Value);
+                    {
+                        Stream imgStream = await accessor.DownloadFromURL(image.Value);
 
-                    using FileStream pngFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "thumbnail.gif");
-                    using FileStream gifFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "thumbnail.png");
+                        using FileStream pngFile = File.Open(Helpers.PathAddBackslash(subDir.FullName) + "thumbnail.gif", FileMode.Open, FileAccess.Write);
+                        using FileStream gifFile = File.Open(Helpers.PathAddBackslash(subDir.FullName) + "thumbnail.png", FileMode.Open, FileAccess.Write);
 
-                    await imgStream.CopyToAsync(pngFile);
+                        await imgStream.CopyToAsync(pngFile);
 
-                    imgStream.Position = 0;
+                        imgStream.Position = 0;
 
-                    await imgStream.CopyToAsync(gifFile);
+                        await imgStream.CopyToAsync(gifFile);
+                    }
 
-                    using FileStream jsonFile = File.Create(Utilities.PathAddBackslash(subDir.FullName) + "info.json");
+                    using FileStream jsonFile = File.Create(Helpers.PathAddBackslash(subDir.FullName) + "info.json");
 
                     using StreamWriter writer = new(jsonFile);
 
@@ -67,7 +69,7 @@ namespace Scratch_Downloader.Options
 
             }
 
-            await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "following.json", JsonSerializer.Serialize(following.OrderBy(f => f.username), new JsonSerializerOptions() { WriteIndented = true }));
+            await WriteTextToFile(Helpers.PathAddBackslash(directory.FullName) + "following.json", JsonSerializer.Serialize(following.OrderBy(f => f.username), new JsonSerializerOptions() { WriteIndented = true }));
 
             await Task.WhenAll(downloadTasks);
 

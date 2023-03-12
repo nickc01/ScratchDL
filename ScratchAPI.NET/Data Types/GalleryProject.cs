@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
     public record GalleryProject(
         GalleryProject.Fields fields,

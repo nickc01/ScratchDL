@@ -1,42 +1,18 @@
 ﻿using Avalonia.Controls.Primitives;
+using Avalonia.Data.Converters;
 using ReactiveUI;
-using Scratch_Downloader;
-using ScratchDL.GUI.Interfaces;
 using ScratchDL.GUI.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reactive;
 using System.Resources;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace ScratchDL.GUI.ViewModels
 {
-    public record class ProjectEntry
-    (
-        bool Selected,
-        long ID,
-        string Name,
-        string Creator
-    );
-
-
-    public class UILock : IDisposable
-    {
-        public readonly Guid ID = Guid.NewGuid();
-
-        readonly HashSet<Guid> _sourceSet;
-
-        public UILock(HashSet<Guid> sourceSet)
-        {
-            _sourceSet = sourceSet;
-            sourceSet.Add(ID);
-        }
-
-        public void Dispose()
-        {
-            _sourceSet.Remove(ID);
-        }
-    }
 
     public class MainWindowViewModel : ViewModelBase, ILoginable
     {
@@ -52,21 +28,17 @@ namespace ScratchDL.GUI.ViewModels
         }
 
         public bool UILocked => currentUILocks.Count > 0;
+
         public bool LoggedIn => api.LoggedIn;
 
-        public List<ProjectEntry> ProjectEntries { get; private set; } = new List<ProjectEntry>(); /*=> new List<ProjectEntry>
+        public ICommand DisplayLoginWindowCommand { get; private set; }
+
+        public List<ProjectEntry> ProjectEntries { get; private set; } = new List<ProjectEntry>();
+
+        public MainWindowViewModel()
         {
-            new ProjectEntry(false,8062448201,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,8062448202,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(false,8062448203,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,8062448204,"Ropes","WingDingWarrior89"),new ProjectEntry(false,80624482011,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,8062448205,"Ropes","WingDingWarrior89"),new ProjectEntry(false,80624482012,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,8062448206,"Ropes","WingDingWarrior89"),new ProjectEntry(false,80624482013,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,8062448207,"Ropes","WingDingWarrior89"),new ProjectEntry(false,80624482014,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,8062448208,"Ropes","WingDingWarrior89"),new ProjectEntry(false,80624482015,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,8062448209,"Ropes","WingDingWarrior89"),new ProjectEntry(false,80624482016,"Ropes","WingDingWarrior89"),
-            new ProjectEntry(true,80624482010,"Ropes","WingDingWarrior89")
-        };*/
+            DisplayLoginWindowCommand = ReactiveCommand.Create(DisplayLoginWindow);
+        }
 
         public void DisplayLoginWindow()
         {
@@ -76,6 +48,11 @@ namespace ScratchDL.GUI.ViewModels
                 login.DataContext = new LoginWindowViewModel(this);
             }
             login.Show(MainWindow.Instance);
+        }
+
+        public void OnModeSelection(int mode)
+        {
+            
         }
 
         public async Task Login(string username, string password)
@@ -114,10 +91,51 @@ namespace ScratchDL.GUI.ViewModels
 
         ~MainWindowViewModel() => api?.Dispose();
 
-        public UILock LockUI() => new UILock(currentUILocks);
+        public UILock LockUI()
+        {
+            var uiLock = new UILock(currentUILocks);
+            this.RaisePropertyChanged(nameof(UILocked));
+            return uiLock;
+        }
 
         public bool UnlockUI(UILock lockID) => UnlockUI(lockID.ID);
 
-        public bool UnlockUI(Guid lockID) => currentUILocks.Remove(lockID);
+        public bool UnlockUI(Guid lockID)
+        {
+            var removed = currentUILocks.Remove(lockID);
+            this.RaisePropertyChanged(nameof(UILocked));
+            return removed;
+        }
+
+        public ProjectEntry AddProjectEntry(long id, string name, string creator)
+        {
+            var entry = new ProjectEntry(true, id, name, creator);
+            ProjectEntries.Add(entry);
+            this.RaisePropertyChanged(nameof(ProjectEntries));
+            return entry;
+        }
+
+        public bool RemoveProjectEntry(ProjectEntry entry)
+        {
+            var removed = ProjectEntries.Remove(entry);
+            if (removed)
+            {
+                this.RaisePropertyChanged(nameof(ProjectEntries));
+            }
+            return removed;
+        }
+
+        public bool RemoveProjectEntry(long id)
+        {
+            var foundEntry = ProjectEntries.FirstOrDefault(e => e.ID == id);
+            if (foundEntry != null)
+            {
+                return RemoveProjectEntry(foundEntry);
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

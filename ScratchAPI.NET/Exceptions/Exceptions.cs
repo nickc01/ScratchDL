@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
 	[Serializable]
 	public class NoInternetException : Exception

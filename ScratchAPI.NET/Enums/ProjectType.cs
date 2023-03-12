@@ -1,4 +1,4 @@
-﻿namespace Scratch_Downloader.Enums
+﻿namespace ScratchDL.Enums
 {
     public enum ProjectType
     {

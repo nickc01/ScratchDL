@@ -1,10 +1,11 @@
-﻿using Scratch_Downloader.Options.Base;
+﻿using ScratchDL.CMD.Options.Base;
+using ScratchDL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Scratch_Downloader
+namespace ScratchDL.CMD
 {
     internal class Program
     {

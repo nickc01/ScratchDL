@@ -1,4 +1,4 @@
-﻿namespace Scratch_Downloader.Featured
+﻿namespace ScratchDL.Featured
 {
     public record class FeaturedData(
         List<FeaturedProject> community_newest_projects,

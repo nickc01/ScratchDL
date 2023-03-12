@@ -1,6 +1,6 @@
-﻿using Scratch_Downloader.Enums;
+﻿using ScratchDL.Enums;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
     public abstract class DownloadedProject
     {
@@ -12,11 +12,11 @@ namespace Scratch_Downloader
         }
 
         public abstract ProjectType Type { get; }
-        public abstract void Package(FileInfo destination);
+        public abstract Task Package(FileInfo destination);
 
-        public void ExportProject(DirectoryInfo directory, string fileName)
+        public async Task ExportProject(DirectoryInfo directory, string fileName)
         {
-            Package(new FileInfo(ScratchAPI.PathAddBackslash(directory.FullName) + fileName + "." + Type.ToString().ToLower()));
+            await Package(new FileInfo(Helpers.PathAddBackslash(directory.FullName) + fileName + "." + Type.ToString().ToLower()));
         }
     }
 }

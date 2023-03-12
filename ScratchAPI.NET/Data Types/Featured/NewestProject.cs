@@ -1,4 +1,4 @@
-﻿namespace Scratch_Downloader.Featured
+﻿namespace ScratchDL.Featured
 {
     public record class FeaturedProject(
         string thumbnail_url,

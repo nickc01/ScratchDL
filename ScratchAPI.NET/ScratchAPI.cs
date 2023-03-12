@@ -1,11 +1,12 @@
-﻿using Scratch_Downloader.Featured;
+﻿using ScratchDL;
+using ScratchDL.Featured;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
     record class LoginRequest(
         string username,
@@ -18,6 +19,9 @@ namespace Scratch_Downloader
         string timezone = "America/New_York"
     );
 
+    /// <summary>
+    /// Used for downloading and accessing various data from the Scratch website
+    /// </summary>
     public sealed class ScratchAPI : IDisposable
     {
         static readonly JsonSerializerOptions DefaultOptions = new JsonSerializerOptions() { WriteIndented = true };
@@ -29,7 +33,14 @@ namespace Scratch_Downloader
         Dictionary<string, string> cookies = new Dictionary<string, string>();
         StringBuilder cookieString = new StringBuilder();
 
+        /// <summary>
+        /// Is the API currently logged into a user?
+        /// </summary>
         public bool LoggedIn => ProfileLoginInfo != null;
+
+        /// <summary>
+        /// The currently logged in user information, or null if the API is currently not logged in
+        /// </summary>
         public LoginInfo? ProfileLoginInfo { get; private set; }
 
         private ScratchAPI()
@@ -109,7 +120,7 @@ namespace Scratch_Downloader
                 client.DefaultRequestHeaders.Add("X-Requested-With", "XMLHttpRequest");
                 client.DefaultRequestHeaders.Add("X-CSRFToken", csrfToken);
 
-                using (var loginContent = await SendPostMessage("https://scratch.mit.edu/login/", System.Text.Json.JsonSerializer.Serialize(login, DefaultOptions)))
+                using (var loginContent = await SendPostMessage("https://scratch.mit.edu/login/", JsonSerializer.Serialize(login, DefaultOptions)))
                 {
                     if (!loginContent.IsSuccessStatusCode)
                     {
@@ -169,6 +180,11 @@ namespace Scratch_Downloader
             ClearAllCookies();
         }
 
+        /// <summary>
+        /// Downloads data from the url
+        /// </summary>
+        /// <param name="url">The url to download from</param>
+        /// <returns>A response message containing the downloaded data, or null if the data couldn't be downloaded</returns>
         async Task<HttpResponseMessage?> DownloadData(string url)
         {
             if (client == null)
@@ -202,6 +218,12 @@ namespace Scratch_Downloader
             return response;
         }
 
+        /// <summary>
+        /// Downloads data from the URL
+        /// </summary>
+        /// <typeparam name="T">The type of the data to download</typeparam>
+        /// <param name="url">The url to download from</param>
+        /// <returns>Returns the downloaded data, or null if the data could not be downloaded</returns>
         async Task<T?> DownloadData<T>(string url) where T : class
         {
             using (var response = await DownloadData(url))
@@ -209,7 +231,7 @@ namespace Scratch_Downloader
                 if (response != null && response.IsSuccessStatusCode == true)
                 {
                     var str = await response.Content.ReadAsStringAsync();
-                    var result = System.Text.Json.JsonSerializer.Deserialize<T>(str, DefaultOptions);
+                    var result = JsonSerializer.Deserialize<T>(str, DefaultOptions);
                     return result;
                 }
                 else
@@ -219,6 +241,12 @@ namespace Scratch_Downloader
             }
         }
 
+        /// <summary>
+        /// Sends a post message to a URL
+        /// </summary>
+        /// <param name="url">The url to send to</param>
+        /// <param name="data">The data to send</param>
+        /// <returns>Returns an HTTP response from the post</returns>
         async Task<HttpResponseMessage> SendPostMessage(string url, string data)
         {
             var response = await client!.PostAsync(url, new StringContent(data));
@@ -228,6 +256,10 @@ namespace Scratch_Downloader
             return response;
         }
 
+        /// <summary>
+        /// Adds a new cookie that has been received from an HTTP response
+        /// </summary>
+        /// <param name="response">The response to look over</param>
         void ProcessNewCookies(HttpResponseMessage response)
         {
             if (response.Headers.TryGetValues("Set-Cookie", out var values))
@@ -332,7 +364,7 @@ namespace Scratch_Downloader
             if (result != null)
             {
                 //var obj = JObject.Parse(await result.Content.ReadAsStringAsync());
-                using var obj = await System.Text.Json.JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
+                using var obj = await JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
                 //obj.RootElement.GetProperty("Students")
                 if (obj.RootElement.TryGetProperty("msg", out var msgObj))
                 {
@@ -427,7 +459,7 @@ namespace Scratch_Downloader
             {
                 return null;
             }
-            using var obj = await System.Text.Json.JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
+            using var obj = await JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
 
             if (obj.RootElement.TryGetProperty("count", out var countObj) && countObj.TryGetInt64(out var count))
             {
@@ -666,7 +698,7 @@ namespace Scratch_Downloader
             var result = await DownloadData($"https://api.scratch.mit.edu/users/{username}/messages/count");
             if (result != null)
             {
-                using var obj = await System.Text.Json.JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
+                using var obj = await JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
                 if (obj.RootElement.TryGetProperty("count", out var countObj) && countObj.TryGetInt64(out var count))
                 {
                     return count;
@@ -699,6 +731,15 @@ namespace Scratch_Downloader
 
         #endregion
 
+        /// <summary>
+        /// Downloads a list of items from a Scratch URL
+        /// </summary>
+        /// <typeparam name="T">The type of data to download</typeparam>
+        /// <param name="url">The url to download from</param>
+        /// <param name="limit">The limit of how many items to download at once</param>
+        /// <param name="pageFormat">If set to true, then the items will be downloaded using "page" format. Otherwise they will be downloaded using "offset" format</param>
+        /// <param name="maxParallelSpeed">How much the download operation can be parallelized</param>
+        /// <returns>Returns the downloaded list</returns>
         async IAsyncEnumerable<T> DownloadList<T>(string url, int limit, bool pageFormat = false, int maxParallelSpeed = 2048)
         {
             int offset = -limit;
@@ -815,6 +856,11 @@ namespace Scratch_Downloader
 
         static Regex cookieSplitter = new Regex(@"^(.+?)=(.*?);", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Splits cookies into their key and value pairs
+        /// </summary>
+        /// <param name="cookies">The cookies to split</param>
+        /// <returns>Returns the key and value pairs of the cookies</returns>
         static IEnumerable<(string Key, string Value)> SplitCookies(IEnumerable<string> cookies)
         {
             foreach (var cookieString in cookies)
@@ -823,35 +869,48 @@ namespace Scratch_Downloader
             }
         }
 
+        /// <summary>
+        /// Splits a cookie into it's key and value
+        /// </summary>
+        /// <param name="cookie">The cookie to split</param>
+        /// <returns>Returns the key and value of the cookie</returns>
         static (string Key, string Value) SplitCookie(string cookie)
         {
             var match = cookieSplitter.Match(cookie);
             return (match.Groups[1].Value, match.Groups[2].Value);
         }
 
+        /// <summary>
+        /// Removes all cookies
+        /// </summary>
         void ClearAllCookies()
         {
             cookieString.Clear();
         }
 
-        void AddCookie(string key, string value)
+        /// <summary>
+        /// Adds a cookie to the HTTP client
+        /// </summary>
+        /// <param name="cookieKey">The key of the cookie to add</param>
+        /// <param name="cookieValue">The key of the cookie to remove</param>
+        void AddCookie(string cookieKey, string cookieValue)
         {
             if (client == null)
             {
                 return;
             }
-            RemoveCookie(key);
+            RemoveCookie(cookieKey);
 
             if (cookieString.Length <= 1)
             {
                 cookieString.Clear();
-                cookieString.Append($"{key}={value}");
+                cookieString.Append($"{cookieKey}={cookieValue}");
             }
             else
             {
-                cookieString.Append($";{key}={value}");
+                cookieString.Append($";{cookieKey}={cookieValue}");
             }
-            cookies.Add(key, value);
+            cookies.Add(cookieKey, cookieValue);
 
             cookieString.Replace("\r", "");
             cookieString.Replace("\n", "");
@@ -861,23 +920,28 @@ namespace Scratch_Downloader
             client.DefaultRequestHeaders.Add("Cookie", cookieString.ToString());
         }
 
-        bool RemoveCookie(string key)
+        /// <summary>
+        /// Removes a cookie from the HTTP client
+        /// </summary>
+        /// <param name="cookieKey">THe cookie to remove</param>
+        /// <returns>Returns true if the cookie was removed</returns>
+        bool RemoveCookie(string cookieKey)
         {
             if (client == null)
             {
                 return false;
             }
             bool removed = false;
-            if (cookies.ContainsKey(key))
+            if (cookies.ContainsKey(cookieKey))
             {
-                cookies.Remove(key);
+                cookies.Remove(cookieKey);
                 removed = true;
 
                 cookieString.Clear();
 
-                foreach (var (cookieKey, cookieValue) in cookies)
+                foreach (var (key, value) in cookies)
                 {
-                    cookieString.Append($"{cookieKey}={cookieValue};");
+                    cookieString.Append($"{key}={value};");
                 }
 
                 cookieString.Remove(cookieString.Length - 1, 1);
@@ -889,6 +953,9 @@ namespace Scratch_Downloader
             return removed;
         }
 
+        /// <summary>
+        /// Disposes the HTTP Client of the Scratch API
+        /// </summary>
         public void Dispose()
         {
             if (client != null)
@@ -899,10 +966,7 @@ namespace Scratch_Downloader
             GC.SuppressFinalize(this);
         }
 
-        ~ScratchAPI()
-        {
-            Dispose();
-        }
+        ~ScratchAPI() => Dispose();
 
 
 
@@ -921,47 +985,6 @@ namespace Scratch_Downloader
 		 */
 
         #region Project Downloading Functions
-
-        static bool CheckSpan(ReadOnlySpan<byte> span, char[] characters)
-        {
-            for (int i = 0; i < characters.GetLength(0); i++)
-            {
-                if (span[i] != characters[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        static int FindPositionInSpan(ReadOnlySpan<byte> span, char[] characters)
-        {
-            int startPos = 0;
-            int charactersFound = 0;
-            for (int i = 0; i < span.Length; i++)
-            {
-                if (span[i] == characters[charactersFound])
-                {
-                    if (charactersFound == 0)
-                    {
-                        startPos = i;
-                    }
-                    charactersFound++;
-
-                    if (charactersFound == characters.Length)
-                    {
-                        return startPos;
-                    }
-                }
-                else
-                {
-                    startPos = 0;
-                    charactersFound = 0;
-                }
-            }
-
-            return -1;
-        }
 
         /// <summary>
         /// Downloads a project and places the files into a directory
@@ -1002,9 +1025,17 @@ namespace Scratch_Downloader
             }
         }
 
+        /// <summary>
+        /// Downloads a project and places the files into a directory
+        /// </summary>
+        /// <param name="id">The id of the project to download</param>
+        /// <param name="info">The project information</param>
+        /// <param name="outputDirectory">The output location of the project files</param>
+        /// <returns>Returns the directory the project was exported to</returns>
+        /// <exception cref="ProjectDownloadException">Throws if the project could not be downloaded and exported</exception>
         async Task<DirectoryInfo> DownloadAndExportProject(long id, Project info, DirectoryInfo outputDirectory)
         {
-            var dir = await ExportProject(id, info, outputDirectory);
+            var dir = await DownloadAndExportProjectInternal(id, info, outputDirectory);
 
             if (dir == null)
             {
@@ -1052,6 +1083,14 @@ namespace Scratch_Downloader
             }
         }
 
+        /// <summary>
+        /// Downloads a project
+        /// </summary>
+        /// <param name="projectID">The ID of the project to download</param>
+        /// <param name="project_token">The unique token of the project to download</param>
+        /// <param name="author">The author of the project</param>
+        /// <returns>Returns the downloaded project</returns>
+        /// <exception cref="ProjectDownloadException">Throws if the project could not be downloaded</exception>
         async Task<DownloadedProject> DownloadProject(long projectID, string project_token, string? author)
         {
             var projectData = await DownloadData($"https://projects.scratch.mit.edu/{projectID}?token={project_token}");
@@ -1109,27 +1148,24 @@ namespace Scratch_Downloader
             }
         }
 
-        static object? IndexField(object? parent, string fieldName)
+        /// <summary>
+        /// Downloads and exports a project
+        /// </summary>
+        /// <param name="id">The ID of the project</param>
+        /// <param name="info">The project info</param>
+        /// <param name="outputDirectory">The directory to export the project to</param>
+        /// <returns>Returns the directory the project was exported to, or null if the project could not be downloaded or exported</returns>
+        async Task<DirectoryInfo?> DownloadAndExportProjectInternal(long id, Project info, DirectoryInfo outputDirectory)
         {
-            if (parent == null)
-            {
-                return null;
-            }
-
-            return parent.GetType().GetProperty(fieldName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(parent);
-        }
-
-        public async Task<DirectoryInfo?> ExportProject(long id, Project info, DirectoryInfo outputDirectory)
-        {
-            var filteredName = RemoveIllegalCharacters(info.title ?? id.ToString());
+            var filteredName = Helpers.RemoveIllegalCharacters(info.title ?? id.ToString());
             if (string.IsNullOrEmpty(filteredName) || string.IsNullOrWhiteSpace(filteredName))
             {
                 filteredName = "UNNAMED_PROJECT_" + Guid.NewGuid().ToString();
             }
 
-            var projectSubDir = new DirectoryInfo(PathAddBackslash(outputDirectory.FullName) + filteredName);
+            var projectSubDir = new DirectoryInfo(Helpers.PathAddBackslash(outputDirectory.FullName) + filteredName);
 
-            if (projectSubDir.Exists && File.Exists(PathAddBackslash(projectSubDir.FullName) + "Info.md"))
+            if (projectSubDir.Exists && File.Exists(Helpers.PathAddBackslash(projectSubDir.FullName) + "Info.md"))
             {
                 return projectSubDir;
             }
@@ -1145,11 +1181,11 @@ namespace Scratch_Downloader
             }
 
 
-            downloadedProject.ExportProject(projectSubDir, filteredName);
+            await downloadedProject.ExportProject(projectSubDir, filteredName);
 
             if (projectTemplate == null)
             {
-                using (var stream = typeof(ScratchAPI).Assembly.GetManifestResourceStream("ScratchAPI.NET.Resources.ProjectTemplate.md"))
+                using (var stream = typeof(ScratchAPI).Assembly.GetManifestResourceStream("ScratchDL.Resources.ProjectTemplate.md"))
                 {
                     projectTemplate = new byte[stream!.Length];
                     await stream.ReadAsync(projectTemplate, 0, (int)stream.Length);
@@ -1182,7 +1218,7 @@ namespace Scratch_Downloader
                     {
                         foreach (var path in placeholderPaths)
                         {
-                            currentValue = IndexField(currentValue, path);
+                            currentValue = Helpers.GetFieldValue(currentValue, path);
                             if (currentValue == null)
                             {
                                 break;
@@ -1209,8 +1245,8 @@ namespace Scratch_Downloader
             {
                 var imageFileName = Regex.Match(info?.image ?? id.ToString(), @"(\d{3,}_\d{2,}x\d{2,}\..*$)").Groups[1].Value;
 
-                var imagePath = PathAddBackslash(projectSubDir.FullName) + imageFileName;
-                using var file = File.OpenWrite(imagePath);
+                var imagePath = Helpers.PathAddBackslash(projectSubDir.FullName) + imageFileName;
+                using var file = File.Open(imagePath, FileMode.Create, FileAccess.Write);
 
                 var imageWriteTask = image.CopyToAsync(file);
                 await imageWriteTask;
@@ -1223,69 +1259,23 @@ namespace Scratch_Downloader
                 template.Replace("%thumbnail%", "");
             }
 
-            for (int i = 0; i < 100; i++)
+            using (var infoFileStream = File.Open(Helpers.PathAddBackslash(projectSubDir.FullName) + "Info.md", FileMode.Create, FileAccess.Write))
             {
-                try
+                using (var writer = new StreamWriter(infoFileStream))
                 {
-                    await File.WriteAllTextAsync(PathAddBackslash(projectSubDir.FullName) + "Info.md", template.ToString());
-                }
-                catch (Exception e)
-                {
-                    if (i == 99)
-                    {
-                        throw;
-                    }
-                    continue;
+                    await writer.WriteAsync(template.ToString());
                 }
             }
 
             return projectSubDir;
         }
 
-        internal static string RemoveIllegalCharacters(string input)
-        {
-            string invalidChars = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-
-            var filteredName = input;
-
-            foreach (char c in invalidChars)
-            {
-                filteredName = filteredName.Replace(c.ToString(), "");
-            }
-            return filteredName;
-        }
-
-        internal static string PathAddBackslash(string path)
-        {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
-            path = path.TrimEnd();
-
-            if (PathEndsWithDirectorySeparator())
-                return path;
-
-            return path + GetDirectorySeparatorUsedInPath();
-
-            bool PathEndsWithDirectorySeparator()
-            {
-                if (path.Length == 0)
-                    return false;
-
-                char lastChar = path[path.Length - 1];
-                return lastChar == Path.DirectorySeparatorChar
-                    || lastChar == Path.AltDirectorySeparatorChar;
-            }
-
-            char GetDirectorySeparatorUsedInPath()
-            {
-                if (path.Contains(Path.AltDirectorySeparatorChar))
-                    return Path.AltDirectorySeparatorChar;
-
-                return Path.DirectorySeparatorChar;
-            }
-        }
-
+        /// <summary>
+        /// Downloads data from a URL
+        /// </summary>
+        /// <param name="url">The url to download the data from</param>
+        /// <returns></returns>
+        /// <exception cref="Exception">Throws if the file couldn't be downloaded</exception>
         public async Task<Stream> DownloadFromURL(string url)
         {
             int counter = 0;
@@ -1314,34 +1304,79 @@ namespace Scratch_Downloader
             }
         }
 
-        Task<Stream> DownloadProjectImage(long projectID)
+        /// <summary>
+        /// Downloads the project's thumbnail image
+        /// </summary>
+        /// <param name="projectID">The project ID to get the image of</param>
+        /// <returns>Returns a stream to the image data, or null if the image couldn't be downloaded</returns>
+        public async Task<Stream?> DownloadProjectImage(long projectID)
         {
-            return DownloadFromURL($"https://cdn2.scratch.mit.edu/get_image/project/{projectID}_480x360.png");
+            try
+            {
+                return await DownloadFromURL($"https://cdn2.scratch.mit.edu/get_image/project/{projectID}_480x360.png");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to download image of project {projectID} : {e}");
+                return null;
+            }
         }
 
-        async Task<Stream?> DownloadProjectImage(Project info)
+        /// <summary>
+        /// Downloads the project's thumbnail image
+        /// </summary>
+        /// <param name="info">The project to get the image of</param>
+        /// <returns>Returns a stream to the image data, or null if the image couldn't be downloaded</returns>
+        public async Task<Stream?> DownloadProjectImage(Project info)
         {
-            var stream = await DownloadFromURL(info.image);
+            Stream? stream = null;
+            try
+            {
+                stream = await DownloadFromURL(info.image);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to download image of project {info.title} : {e}");
+            }
             if (stream == null && info.images.Count > 0)
             {
-                stream = await DownloadFromURL(info.images.MaxBy(i => int.Parse(i.Key.Split("x")[0])).Value);
+                try
+                {
+                    stream = await DownloadFromURL(info.images.MaxBy(i => int.Parse(i.Key.Split("x")[0])).Value);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Failed to download image of project {info.title} : {e}");
+                }
             }
             return stream;
         }
 
+        /// <summary>
+        /// Downloads a project as an SB1 project
+        /// </summary>
+        /// <param name="projectID">The ID of the project</param>
+        /// <param name="data">The downloaded project data</param>
+        /// <param name="author">The author of the project</param>
+        /// <returns>Returns the SB1 project, or null if the data could not be interpreted as an SB1 project</returns>
         SB1Project? DownloadSB1Project(long projectID, byte[] data, string? author)
         {
             var magic = "ScratchV0".ToCharArray();
-            if (CheckSpan(data.AsSpan(0, magic.GetLength(0)), magic))
+            if (Helpers.IsSpanSameAs(data.AsSpan(0, magic.GetLength(0)), magic))
             {
                 return new SB1Project(author ?? FindAuthorInSB1(data), data);
             }
             return null;
         }
 
+        /// <summary>
+        /// Searches over the SB1 binary data for the author of the project
+        /// </summary>
+        /// <param name="data">The SB1 binary project data</param>
+        /// <returns>Returns the author, or null if no author was found</returns>
         string? FindAuthorInSB1(byte[] data)
         {
-            int pos = FindPositionInSpan(data, "author".ToCharArray());
+            int pos = Helpers.FindPositionInSpan(data, "author".ToCharArray());
             if (pos > -1)
             {
                 pos += 11;
@@ -1357,6 +1392,14 @@ namespace Scratch_Downloader
             return null;
         }
 
+
+        /// <summary>
+        /// Attempts to download a project as an SB2 Project
+        /// </summary>
+        /// <param name="projectID">The id of the project</param>
+        /// <param name="data">The downloaded project data</param>
+        /// <param name="author">The author of the project</param>
+        /// <returns>Returns the project as an SB2 project, or null if an SB2 project isn't possible</returns>
         async Task<SB2Project?> DownloadSB2Project(long projectID, byte[] data, string? author)
         {
             try
@@ -1364,7 +1407,7 @@ namespace Scratch_Downloader
                 string s = Encoding.UTF8.GetString(data, 0, data.Length);
                 if (!string.IsNullOrWhiteSpace(s))
                 {
-                    var obj = System.Text.Json.Nodes.JsonNode.Parse(s, documentOptions: new JsonDocumentOptions() { MaxDepth = 2000 });
+                    var obj = JsonNode.Parse(s, documentOptions: new JsonDocumentOptions() { MaxDepth = 2000 });
                     if (obj == null)
                     {
                         return SB2BinaryProject(data);
@@ -1379,7 +1422,11 @@ namespace Scratch_Downloader
             }
         }
 
-
+        /// <summary>
+        /// Attempts to download a project as an SB3 Project
+        /// </summary>
+        /// <param name="projectID">The id of the project</param>
+        /// <returns>Returns the project as an SB3 project, or null if an SB3 project isn't possible</returns>
         async Task<SB3Project?> DownloadSB3Project(long projectID)
         {
             string PROJECTS_API = $"https://projects.scratch.mit.edu/{projectID}";
@@ -1398,7 +1445,6 @@ namespace Scratch_Downloader
 
                 if (response.StartsWith("<"))
                 {
-                    Console.WriteLine($"D - {projectID}");
                     return null;
                 }
 
@@ -1521,6 +1567,11 @@ namespace Scratch_Downloader
             }
         }
 
+        /// <summary>
+        /// Scans a json object for any sound, pen or music assets
+        /// </summary>
+        /// <param name="json">The json object to scan</param>
+        /// <returns>Returns a list of assets found</returns>
         List<MetaAsset> ScanForAssets(JsonNode json)
         {
             List<MetaAsset> Assets = new List<MetaAsset>();
@@ -1529,9 +1580,9 @@ namespace Scratch_Downloader
                 try
                 {
                     Assets.Add(new PenMetaAsset(
-                            ((string)json["penLayerMD5"].AsValue()),
+                            (string)json["penLayerMD5"].AsValue(),
                             json,
-                            ((int)json["penLayerID"].AsValue())
+                            (int)json["penLayerID"].AsValue()
                         ));
                 }
                 catch (Exception)
@@ -1548,13 +1599,13 @@ namespace Scratch_Downloader
                     try
                     {
                         Assets.Add(new SoundMetaAsset(
-                            ((string?)sound["md5"].AsValue()),
+                            (string?)sound["md5"].AsValue(),
                             sound,
-                            ((string?)sound["soundName"].AsValue()),
-                            ((int)sound["soundID"].AsValue()),
-                            ((int)sound["sampleCount"].AsValue()),
-                            ((int)sound["rate"].AsValue()),
-                            ((string?)sound["format"].AsValue())
+                            (string?)sound["soundName"].AsValue(),
+                            (int)sound["soundID"].AsValue(),
+                            (int)sound["sampleCount"].AsValue(),
+                            (int)sound["rate"].AsValue(),
+                            (string?)sound["format"].AsValue()
                         ));
                     }
                     catch (Exception)
@@ -1572,13 +1623,13 @@ namespace Scratch_Downloader
                     try
                     {
                         Assets.Add(new CostumeMetaAsset(
-                            ((string?)costume["baseLayerMD5"].AsValue()),
+                            (string?)costume["baseLayerMD5"].AsValue(),
                             costume,
-                            ((string?)costume["costumeName"].AsValue()),
-                            ((int)costume["baseLayerID"].AsValue()),
-                            ((int?)costume["bitmapResolution"]?.AsValue()),
-                            ((int)costume["rotationCenterX"].AsValue()),
-                            ((int)costume["rotationCenterY"].AsValue())
+                            (string?)costume["costumeName"].AsValue(),
+                            (int)costume["baseLayerID"].AsValue(),
+                            (int?)costume["bitmapResolution"]?.AsValue(),
+                            (int)costume["rotationCenterX"].AsValue(),
+                            (int)costume["rotationCenterY"].AsValue()
                         ));
                     }
                     catch (Exception)
@@ -1598,6 +1649,11 @@ namespace Scratch_Downloader
             return Assets;
         }
 
+        /// <summary>
+        /// Removes duplicates from the list. The duplicates are stored as lists in a dictionary.
+        /// </summary>
+        /// <param name="assets">The assets to deduplicate</param>
+        /// <returns>Returns a dictionary where the duplicates are stored as lists</returns>
         Dictionary<MetaAsset, List<MetaAsset>> DeduplicateAssets(List<MetaAsset> assets)
         {
             var deduplicatedAssets = new Dictionary<MetaAsset, List<MetaAsset>>(MetaAsset.Comparer.Default);
@@ -1615,6 +1671,14 @@ namespace Scratch_Downloader
             return deduplicatedAssets;
         }
 
+        /// <summary>
+        /// Interprets a json object as an SB2 Json Project
+        /// </summary>
+        /// <param name="projectID">The ID of the project</param>
+        /// <param name="json">The json object to interpret</param>
+        /// <param name="author">The author of the project</param>
+        /// <returns>Returns an SB2 Json Project</returns>
+        /// <exception cref="Exception">Throws if the json object could not be interpreted</exception>
         async Task<SB2Project> SB2JsonProject(long projectID, JsonNode json, string? author)
         {
             if (string.IsNullOrEmpty(author))
@@ -1728,7 +1792,7 @@ namespace Scratch_Downloader
         {
             var zipMagic = "PK".ToCharArray();
 
-            if (!CheckSpan(data.AsSpan().Slice(0, 2), zipMagic))
+            if (!Helpers.IsSpanSameAs(data.AsSpan().Slice(0, 2), zipMagic))
             {
                 return null;
             }

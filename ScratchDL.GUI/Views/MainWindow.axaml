@@ -33,23 +33,12 @@
 
 		<StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Spacing="10" Orientation="Horizontal">
 			<TextBlock VerticalAlignment="Center" FontSize="16" Margin="10 5 0 5">Mode:</TextBlock>
-			<ComboBox SelectedIndex="0" VerticalAlignment="Stretch">
-				<ComboBoxItem>Download all projects from current user</ComboBoxItem>
-				<ComboBoxItem>Download all shared projects from another user</ComboBoxItem>
-				<ComboBoxItem>Download favorite projects from a user</ComboBoxItem>
-				<ComboBoxItem>Download all followers from a user</ComboBoxItem>
-				<ComboBoxItem>Download all following users from a user</ComboBoxItem>
-				<ComboBoxItem>Download profile information for a user</ComboBoxItem>
-				<ComboBoxItem>Download a single project</ComboBoxItem>
-				<ComboBoxItem>Download a single studio</ComboBoxItem>
-				<ComboBoxItem>Download all studios from a user</ComboBoxItem>
-				<ComboBoxItem>Scan for project metadata by user</ComboBoxItem>
-			</ComboBox>
+			<ComboBox IsEnabled="{CompiledBinding !UILocked}" Name="mode_selection" SelectedIndex="0" VerticalAlignment="Stretch"/>
 		</StackPanel>
 		
 		<StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Spacing="10" Orientation="Horizontal">
 			<TextBlock Text="{CompiledBinding LoggedInUser}" VerticalAlignment="Center"></TextBlock>
-			<Button Command="{Binding DisplayLoginWindow}" FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Name="loginButton" Margin="0 0 0 0">Login</Button>
+			<Button IsEnabled="{CompiledBinding !UILocked}" Command="{CompiledBinding DisplayLoginWindowCommand}" FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Name="loginButton" Margin="0 0 0 0">Login</Button>
 			<Rectangle Fill="White" Width="44"/>
 		</StackPanel>
 		<ScrollViewer Margin="0 0 0 54" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
@@ -65,7 +54,7 @@
 		</ScrollViewer>
 
 		<StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="0" Height="44" VerticalAlignment="Bottom">
-			<Button HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Download</Button>
+			<Button IsEnabled="{CompiledBinding !UILocked}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Download</Button>
 		</StackPanel>
 
 		<GridSplitter IsEnabled="True" Grid.Column="1" Grid.Row="2" Background="White" ResizeDirection="Columns"/>
@@ -76,7 +65,7 @@
 
 		<ScrollViewer Margin="0 0 0 54" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch">
 			<Grid>
-				<DataGrid Name="MyDataGrid" SelectionMode="Single" Items="{Binding ProjectEntries}" AutoGenerateColumns="False" >
+				<DataGrid Name="MyDataGrid" SelectionMode="Single" Items="{CompiledBinding ProjectEntries}" AutoGenerateColumns="False" >
 					<DataGrid.Columns>
 						<DataGridCheckBoxColumn Header="Selected" Binding="{Binding Selected}" />
 						<DataGridTextColumn Header="ID"  Binding="{Binding ID}"/>
@@ -87,8 +76,22 @@
 			</Grid>
 		</ScrollViewer>
 		<StackPanel Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="2" Height="44" VerticalAlignment="Bottom">
-			<Button HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Select All</Button>
-			<Button HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Export Selected</Button>
+			<Button Content="Select All" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+				<Button.IsEnabled>
+					<MultiBinding Converter="{x:Static BoolConverters.And}">
+						<CompiledBinding Path="!UILocked" />
+						<CompiledBinding Path="!!ProjectEntries.Count" />
+					</MultiBinding>
+				</Button.IsEnabled>
+			</Button>
+			<Button Content="Export Selected" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+				<Button.IsEnabled>
+					<MultiBinding Converter="{x:Static BoolConverters.And}">
+						<CompiledBinding Path="!UILocked" />
+						<CompiledBinding Path="!!ProjectEntries.Count" />
+					</MultiBinding>
+				</Button.IsEnabled>
+			</Button>
 		</StackPanel>
 	</Grid>
 	

@@ -1,9 +1,9 @@
-﻿using Scratch_Downloader.Enums;
+﻿using ScratchDL.Enums;
 using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
 using System.Text.Json;
 
-namespace Scratch_Downloader
+namespace ScratchDL
 {
     public class SB3Project : DownloadedProject
     {
@@ -73,7 +73,7 @@ namespace Scratch_Downloader
 
         public override ProjectType Type => ProjectType.SB3;
 
-        public override void Package(FileInfo destination)
+        public override async Task Package(FileInfo destination)
         {
             if (!destination.Directory!.Exists)
             {
@@ -82,15 +82,15 @@ namespace Scratch_Downloader
             if (Files.Count == 1 && Files[0].Path == "BINARY.sb2")
             {
                 //DUMP FILE DIRECTLY TO DESTINATION
-                using (var fileStream = File.Create(destination.FullName))
+                using (var fileStream = await Helpers.WaitTillFileAvailable(destination.FullName,FileMode.Create))
                 {
-                    fileStream.Write(Files[0].Data);
+                    await fileStream.WriteAsync(Files[0].Data);
                 }
             }
             else
             {
                 //PACK MULTIPLE FILES AS A ZIP FILE, THEN DUMP TO DESTINATION
-                if (destination.Exists)
+                /*if (destination.Exists)
                 {
                     for (int i = 0; i < 100; i++)
                     {
@@ -108,8 +108,24 @@ namespace Scratch_Downloader
                             continue;
                         }
                     }
+                }*/
+
+                using (var fileStream = await Helpers.WaitTillFileAvailable(destination.FullName,FileMode.Create, FileAccess.Write))
+                {
+                    using (var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create, false))
+                    {
+                        foreach (var file in Files)
+                        {
+                            var entry = zipArchive.CreateEntry(file.Path);
+                            using (var entryStream = entry.Open())
+                            {
+                                await entryStream.WriteAsync(file.Data);
+                            }
+                        }
+                    }
                 }
-                using (var fileStream = File.Create(destination.FullName))
+
+                /*using (var fileStream = File.Create(destination.FullName))
                 {
                     using (var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create, false))
                     {
@@ -122,7 +138,7 @@ namespace Scratch_Downloader
                             }
                         }
                     }
-                }
+                }*/
             }
         }
     }
