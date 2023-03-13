@@ -1,4 +1,5 @@
-﻿using ScratchDL.CMD.Options.Base;
+﻿using ScratchDL;
+using ScratchDL.CMD.Options.Base;
 using ScratchDL.Enums;
 using System;
 using System.Collections.Generic;
@@ -83,11 +84,11 @@ public static class Utilities
 
 			if (index < descArray.Length)
 			{
-				Console.WriteLine($"{(int)(object)val} - {Prettify(val.ToString())} {defaultText} : {descArray[index]}");
+				Console.WriteLine($"{(int)(object)val} - {Helpers.Prettify(val.ToString())} {defaultText} : {descArray[index]}");
 			}
 			else
 			{
-				Console.WriteLine($"{(int)(object)val} - {Prettify(val.ToString())} {defaultText}");
+				Console.WriteLine($"{(int)(object)val} - {Helpers.Prettify(val.ToString())} {defaultText}");
 			}
 
 
@@ -174,28 +175,6 @@ public static class Utilities
 			filteredName = filteredName.Replace(c.ToString(), "");
 		}
 		return filteredName;
-	}
-
-	public static string Prettify(string input)
-	{
-		StringBuilder builder = new StringBuilder(input);
-		if (builder.Length > 0)
-		{
-			if (char.IsLower(builder[0]))
-			{
-				builder[0] = char.ToUpper(builder[0]);
-			}
-			builder.Replace("_", "");
-
-			var output = builder.ToString();
-
-			output = Regex.Replace(output, @"([a-z])([A-Z])", "$1 $2");
-			output = Regex.Replace(output, @"([a-zA-Z])([A-Z])([a-z])", "$1 $2$3");
-
-			return output;
-		}
-
-		return input;
 	}
 
 	public static ScanType GetScanType() => PickEnumOption<ScanType>("How should the user's projects be scanned?", new string[]

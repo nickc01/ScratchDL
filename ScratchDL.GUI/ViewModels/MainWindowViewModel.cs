@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
+using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -27,32 +28,49 @@ namespace ScratchDL.GUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _loggedInUser, value);
         }
 
+        int _selectedModeIndex = 0;
+        public int SelectedModeIndex
+        {
+            get => _selectedModeIndex;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _selectedModeIndex, value);
+                OnModeSelection(value);
+            }
+        }
+
         public bool UILocked => currentUILocks.Count > 0;
 
         public bool LoggedIn => api.LoggedIn;
 
-        public ICommand DisplayLoginWindowCommand { get; private set; }
+        bool _showDownloadProgressBar = true;
+        public bool ShowDownloadProgressBar
+        {
+            get => _showDownloadProgressBar;
+            set => this.RaiseAndSetIfChanged(ref _showDownloadProgressBar, value);
+        }
+
+        float _downloadProgress = 0f;
+        public float DownloadProgress
+        {
+            get => _downloadProgress;
+            set => this.RaiseAndSetIfChanged(ref _downloadProgress, value);
+        }
+
+        public List<DownloadMode> Modes;
 
         public List<ProjectEntry> ProjectEntries { get; private set; } = new List<ProjectEntry>();
 
+
+
         public MainWindowViewModel()
         {
-            DisplayLoginWindowCommand = ReactiveCommand.Create(DisplayLoginWindow);
-        }
-
-        public void DisplayLoginWindow()
-        {
-            var login = LoginWindow.Instance ?? new LoginWindow();
-            if (login.DataContext == null)
-            {
-                login.DataContext = new LoginWindowViewModel(this);
-            }
-            login.Show(MainWindow.Instance);
-        }
-
-        public void OnModeSelection(int mode)
-        {
             
+        }
+
+        public void OnModeSelection(int modeIndex)
+        {
+            Debug.WriteLine("Current Mode = " + modeIndex);
         }
 
         public async Task Login(string username, string password)

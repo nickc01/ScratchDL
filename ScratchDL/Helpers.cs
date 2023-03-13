@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ScratchDL
@@ -179,6 +180,33 @@ namespace ScratchDL
 
                 return Path.DirectorySeparatorChar;
             }
+        }
+
+        /// <summary>
+        /// Adds spaces before uppercase letters
+        /// </summary>
+        /// <param name="input">The input text to modify</param>
+        /// <returns>Returns the prettier text</returns>
+        public static string Prettify(string input)
+        {
+            StringBuilder builder = new StringBuilder(input);
+            if (builder.Length > 0)
+            {
+                if (char.IsLower(builder[0]))
+                {
+                    builder[0] = char.ToUpper(builder[0]);
+                }
+                builder.Replace("_", "");
+
+                var output = builder.ToString();
+
+                output = Regex.Replace(output, @"([a-z])([A-Z])", "$1 $2");
+                output = Regex.Replace(output, @"([a-zA-Z])([A-Z])([a-z])", "$1 $2$3");
+
+                return output;
+            }
+
+            return input;
         }
     }
 }

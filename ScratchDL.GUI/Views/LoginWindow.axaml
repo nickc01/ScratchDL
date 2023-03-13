@@ -17,6 +17,6 @@
 		<TextBox Text="{CompiledBinding Username}" FontSize="17" MinWidth="200"></TextBox>
 		<TextBlock FontSize="20">Password</TextBlock>
 		<TextBox Text="{CompiledBinding Password}" FontSize="17" PasswordChar="*" MinWidth="200"></TextBox>
-		<Button Command="{CompiledBinding LoginCommand}" HorizontalAlignment="Center" FontSize="20">Login</Button>
+		<Button Name="login_button" Command="{CompiledBinding LoginCommand}" HorizontalAlignment="Center" FontSize="20">Login</Button>
 	</StackPanel>
 </Window>

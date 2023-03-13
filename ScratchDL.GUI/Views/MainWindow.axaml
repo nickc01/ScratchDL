@@ -31,18 +31,19 @@
 			<ColumnDefinition MinWidth="435" Width="*"></ColumnDefinition>
 		</Grid.ColumnDefinitions>
 
+
 		<StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Spacing="10" Orientation="Horizontal">
 			<TextBlock VerticalAlignment="Center" FontSize="16" Margin="10 5 0 5">Mode:</TextBlock>
-			<ComboBox IsEnabled="{CompiledBinding !UILocked}" Name="mode_selection" SelectedIndex="0" VerticalAlignment="Stretch"/>
+			<ComboBox IsEnabled="{CompiledBinding !UILocked}" Name="mode_selection" SelectedIndex="{CompiledBinding SelectedModeIndex}" VerticalAlignment="Stretch"/>
 		</StackPanel>
 		
 		<StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Spacing="10" Orientation="Horizontal">
 			<TextBlock Text="{CompiledBinding LoggedInUser}" VerticalAlignment="Center"></TextBlock>
-			<Button IsEnabled="{CompiledBinding !UILocked}" Command="{CompiledBinding DisplayLoginWindowCommand}" FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Name="loginButton" Margin="0 0 0 0">Login</Button>
+			<Button Name="login_button" IsEnabled="{CompiledBinding !UILocked}" FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Margin="0 0 0 0">Login</Button>
 			<Rectangle Fill="White" Width="44"/>
 		</StackPanel>
 		<ScrollViewer Margin="0 0 0 54" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-			<StackPanel Margin="5" Spacing="3">
+			<StackPanel Name="mode_controls_section" Margin="5" Spacing="3">
 				<Button>This is a test</Button>
 				<Button>This is a test</Button>
 				<Button>This is a test</Button>
@@ -54,6 +55,7 @@
 		</ScrollViewer>
 
 		<StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="0" Height="44" VerticalAlignment="Bottom">
+			<ProgressBar Value="{CompiledBinding DownloadProgress}" ShowProgressText="{CompiledBinding ShowDownloadProgressBar}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></ProgressBar>
 			<Button IsEnabled="{CompiledBinding !UILocked}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Download</Button>
 		</StackPanel>
 

@@ -30,8 +30,12 @@ namespace ScratchDL.GUI.ViewModels
 
         public ICommand LoginCommand { get; private set; }
 
-        public LoginWindowViewModel(ILoginable loginObject)
+        public LoginWindowViewModel(ILoginable? loginObject)
         {
+            if (loginObject == null)
+            {
+                throw new ArgumentNullException(nameof(loginObject));
+            }
             LoginObject = loginObject;
             LoginCommand = ReactiveCommand.CreateFromTask(Login);
         }

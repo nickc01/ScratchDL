@@ -15,6 +15,14 @@ namespace ScratchDL.GUI.Views
         {
             Instance = this;
             InitializeComponent();
+
+            var loginButton = this.Find<Button>("login_button");
+            loginButton.Click += OnLogin;
+        }
+
+        private void OnLogin(object? sender, RoutedEventArgs e)
+        {
+            Close();
         }
 
         protected override void OnClosed(EventArgs e)
