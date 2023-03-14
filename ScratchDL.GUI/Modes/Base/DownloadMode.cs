@@ -1,6 +1,7 @@
 ﻿using ScratchDL.GUI.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +22,6 @@ namespace ScratchDL.GUI
 
         public abstract Task Download(ScratchAPI api, Action<ProjectEntry> addEntry, Action<double> setProgress);
 
-        public abstract Task Export(IEnumerable<long> selectedIDs);
+        public abstract Task Export(DirectoryInfo folderPath, IEnumerable<long> selectedIDs);
     }
 }
