@@ -17,7 +17,9 @@ namespace ScratchDL.GUI
 
         public abstract string Name { get; }
 
-        public abstract Task Download(Action<ProjectEntry> addEntry);
+        public abstract string Description { get; }
+
+        public abstract Task Download(ScratchAPI api, Action<ProjectEntry> addEntry, Action<double> setProgress);
 
         public abstract Task Export(IEnumerable<long> selectedIDs);
     }

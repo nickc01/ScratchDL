@@ -75,6 +75,10 @@ namespace ScratchDL.GUI.Views
             var modeControlsSection = this.FindControl<StackPanel>("mode_controls_section");
             modeControlsSection.Children.Clear();
 
+            var descriptionBlock = new TextBlock();
+            descriptionBlock.Text = modeUI.ModeObject.Description + '\n';
+
+            modeControlsSection.Children.Add(descriptionBlock);
 
             modeUI.Setup(modeControlsSection);
         }

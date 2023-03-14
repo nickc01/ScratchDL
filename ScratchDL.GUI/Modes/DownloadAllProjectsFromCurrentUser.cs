@@ -14,16 +14,34 @@ namespace ScratchDL.GUI.Modes
     {
         public bool DownloadComments = true;
 
-        public DownloadAllProjectsFromCurrentUser(MainWindowViewModel viewModel) : base(viewModel)
-        {
-
-        }
+        public DownloadAllProjectsFromCurrentUser(MainWindowViewModel viewModel) : base(viewModel) { }
 
         public override string Name => "Download All Projects From Current User";
 
-        public override Task Download(Action<ProjectEntry> addEntry)
+        public override string Description => "Downloads all projects from the currently logged in user\n(Make sure you login first)";
+
+        List<GalleryProject> downloadedProjects = new List<GalleryProject>();
+
+        public override async Task Download(ScratchAPI api, Action<ProjectEntry> addEntry, Action<double> setProgress)
         {
-            return Task.CompletedTask;
+            downloadedProjects.Clear();
+            if (!api.LoggedIn)
+            {
+                throw new ScratchDL.LoginException(0, "Login Required");
+            }
+            var totalCount = await api.GetAllProjectCount();
+            if (totalCount == null)
+            {
+                throw new ScratchDL.LoginException(0, "Login Required");
+            }
+
+            await foreach (var project in api.GetAllProjectsByCurrentUser())
+            {
+                Debug.WriteLine("Project = " + project.fields.title);
+                downloadedProjects.Add(project);
+                addEntry(new ProjectEntry(true,project.id,project.fields.title,project.fields.creator.username));
+                setProgress(100.0 * (downloadedProjects.Count / (double)totalCount.Value));
+            }
         }
 
         public override Task Export(IEnumerable<long> selectedIDs)
@@ -38,31 +56,8 @@ namespace ScratchDL.GUI.Modes
 
         public override void Setup(StackPanel controlsPanel)
         {
-
             var commentsCheckbox = CreateCheckbox("download_comments", "Download Comments", ModeObject.DownloadComments, b => ModeObject.DownloadComments = b);
-            /*var testButton1 = new Button();
-            testButton1.Content = "This is a test 1";
-
-            var test2 = new TextBlock();
-            test2.Text = "This is a text block 123";*/
-
-
-
-            /*var testInput = new TextBox();
-            testInput.Text = ModeObject.TestInput.ToString();
-            testInput.KeyUp += GetNumberUpdateDelegate(testInput, n => ModeObject.TestInput = n);*/
-
             controlsPanel.Children.Add(commentsCheckbox);
-
-            //controlsPanel.Children.Add(testButton1);
-            //controlsPanel.Children.Add(test2);
-            //controlsPanel.Children.Add(testInput);
         }
-
-        /*private void TestInput_KeyUp(object? sender, Avalonia.Input.KeyEventArgs e)
-        {
-            var textbox = (TextBox)e.Source!;
-            ModeObject.TestInput = textbox.Text;
-        }*/
     }
 }

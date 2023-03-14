@@ -44,19 +44,13 @@
 		</StackPanel>
 		<ScrollViewer Margin="0 0 0 54" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<StackPanel Name="mode_controls_section" Margin="5" Spacing="3">
-				<Button>This is a test</Button>
-				<Button>This is a test</Button>
-				<Button>This is a test</Button>
-				<Button>This is a test</Button>
-				<Button>This is a test</Button>
-				<Button>This is a test</Button>
-				<Button>This is a test</Button>
 			</StackPanel>
 		</ScrollViewer>
 
 		<StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="0" Height="44" VerticalAlignment="Bottom">
-			<ProgressBar Value="{CompiledBinding DownloadProgress}" ShowProgressText="{CompiledBinding ShowDownloadProgressBar}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></ProgressBar>
-			<Button IsEnabled="{CompiledBinding !UILocked}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Download</Button>
+			<TextBlock Foreground="Red" Text="Login Required" IsVisible="{CompiledBinding DisplayDownloadError}" TextWrapping="WrapWithOverflow" VerticalAlignment="Center"></TextBlock>
+			<ProgressBar Value="{CompiledBinding DownloadProgress}" IsVisible="{CompiledBinding ShowDownloadProgressBar}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></ProgressBar>
+			<Button Name="download_button" Command="{CompiledBinding BeginDownloadCommand}" IsEnabled="{CompiledBinding !UILocked}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Download</Button>
 		</StackPanel>
 
 		<GridSplitter IsEnabled="True" Grid.Column="1" Grid.Row="2" Background="White" ResizeDirection="Columns"/>
@@ -65,20 +59,18 @@
 		<GridSplitter IsEnabled="False" Grid.Column="2" Grid.Row="1" Background="White" ResizeDirection="Rows"/>
 		<GridSplitter IsEnabled="False" Grid.Column="1" Grid.Row="1" Background="White" ResizeDirection="Rows"/>
 
-		<ScrollViewer Margin="0 0 0 54" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch">
-			<Grid>
-				<DataGrid Name="MyDataGrid" SelectionMode="Single" Items="{CompiledBinding ProjectEntries}" AutoGenerateColumns="False" >
-					<DataGrid.Columns>
-						<DataGridCheckBoxColumn Header="Selected" Binding="{Binding Selected}" />
-						<DataGridTextColumn Header="ID"  Binding="{Binding ID}"/>
-						<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-						<DataGridTextColumn Header="Creator" Binding="{Binding Creator}" />
-					</DataGrid.Columns>
-				</DataGrid>
-			</Grid>
-		</ScrollViewer>
+		<Grid Margin="0 0 0 54" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch">
+			<DataGrid Name="MyDataGrid" SelectionMode="Single" Items="{CompiledBinding ProjectEntries}" AutoGenerateColumns="False" >
+				<DataGrid.Columns>
+					<DataGridCheckBoxColumn Header="Selected" Binding="{Binding Selected}" />
+					<DataGridTextColumn IsReadOnly="True" Header="ID"  Binding="{Binding ID}"/>
+					<DataGridTextColumn IsReadOnly="True"  Header="Name" Binding="{Binding Name}" />
+					<DataGridTextColumn IsReadOnly="True"  Header="Creator" Binding="{Binding Creator}" />
+				</DataGrid.Columns>
+			</DataGrid>
+		</Grid>
 		<StackPanel Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="2" Height="44" VerticalAlignment="Bottom">
-			<Button Content="Select All" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+			<Button Content="Select All" Command="{CompiledBinding SelectAllCommand}" IsEnabled="{CompiledBinding !UILocked}" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
 					<MultiBinding Converter="{x:Static BoolConverters.And}">
 						<CompiledBinding Path="!UILocked" />
@@ -86,7 +78,7 @@
 					</MultiBinding>
 				</Button.IsEnabled>
 			</Button>
-			<Button Content="Export Selected" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+			<Button Content="Export Selected" IsEnabled="{CompiledBinding !UILocked}" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
 					<MultiBinding Converter="{x:Static BoolConverters.And}">
 						<CompiledBinding Path="!UILocked" />

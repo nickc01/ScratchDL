@@ -13,10 +13,10 @@
 		MaxHeight="200"
 		x:DataType="vm:LoginWindowViewModel">
 	<StackPanel HorizontalAlignment="Center" Margin="10" Spacing="5">
-		<TextBlock FontSize="20">Username:</TextBlock>
-		<TextBox Text="{CompiledBinding Username}" FontSize="17" MinWidth="200"></TextBox>
+		<TextBlock FontSize="20">Username</TextBlock>
+		<TextBox Name="username_field" Text="{CompiledBinding Username}" FontSize="17" MinWidth="200"></TextBox>
 		<TextBlock FontSize="20">Password</TextBlock>
-		<TextBox Text="{CompiledBinding Password}" FontSize="17" PasswordChar="*" MinWidth="200"></TextBox>
+		<TextBox Name="password_field" Text="{CompiledBinding Password}" FontSize="17" PasswordChar="*" MinWidth="200"></TextBox>
 		<Button Name="login_button" Command="{CompiledBinding LoginCommand}" HorizontalAlignment="Center" FontSize="20">Login</Button>
 	</StackPanel>
 </Window>

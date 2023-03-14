@@ -32,7 +32,9 @@ namespace ScratchDL.GUI
                     modes.Add((DownloadMode)Activator.CreateInstance(type, vm)!);
                 }
 
-                vm.Modes = modes;
+                List<DownloadMode> sortedModes = new List<DownloadMode>();
+
+                vm.Modes = sortedModes;
 
                 var modeUITypes = Assembly.GetAssembly(typeof(MainWindowViewModel))!.GetTypes().Where(t => !t.IsInterface && !t.IsAbstract && !t.ContainsGenericParameters && t != typeof(IDownloadModeUI) && t.IsAssignableTo(typeof(IDownloadModeUI)));
 
@@ -52,7 +54,11 @@ namespace ScratchDL.GUI
 
                     var mode = modes.FirstOrDefault(m => m.GetType().IsAssignableTo(modeType));
 
-                    modeUIs.Add((IDownloadModeUI)Activator.CreateInstance(type, mode)!);
+                    if (mode != null)
+                    {
+                        modeUIs.Add((IDownloadModeUI)Activator.CreateInstance(type, mode)!);
+                        sortedModes.Add(mode);
+                    }
                 }
 
                 desktop.MainWindow = new MainWindow(vm, modeUIs);

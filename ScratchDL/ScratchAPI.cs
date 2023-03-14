@@ -1,5 +1,6 @@
 ﻿using ScratchDL;
 using ScratchDL.Featured;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -452,7 +453,7 @@ namespace ScratchDL
         /// <summary>
         /// Gets the total amount of projects that have been uploaded to scratch. Returns null if the data couldn't be retrieved
         /// </summary>
-        public async Task<long?> GetAllProjectCount()
+        public async Task<long?> GetEntireSiteProjectCount()
         {
             var result = await DownloadData("https://api.scratch.mit.edu/projects/count/all");
             if (result == null)
@@ -545,6 +546,111 @@ namespace ScratchDL
         public Task<Comment?> GetProjectCommentInfo(string username, long project_id, long comment_id)
         {
             return DownloadData<Comment>($"https://api.scratch.mit.edu/users/{username}/projects/{project_id}/comments/{comment_id}");
+        }
+
+        /// <summary>
+        /// Downloads how many projects the user has shared, or null if the count couldn't be retrieved
+        /// </summary>
+        /// <param name="username">The username to get the shared project count from</param>
+        /// <returns>Returns how many projects the user has shared, or null if the count couldn't be retrieved</returns>
+        public async Task<long?> DownloadProjectCount(string username)
+        {
+            var html = await DownloadUserSite(username);
+            if (html == null)
+            {
+                return null;
+            }
+
+            var match = RegexObjects.FindSharedProjectCount.Match(html);
+
+            if (match.Success && long.TryParse(match.Groups[1].Value, out var result))
+            {
+                return result;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Gets the count of ALL projects made by the logged in user, or null if the number couldn't be retrieved
+        /// </summary>
+        /// <returns>Returns the count of ALL projects made by the logged in user, or null if the count couldn't be retrieved</returns>
+        public async Task<long?> GetAllProjectCount()
+        {
+            var html = await DownloadMyStuff();
+            if (html == null)
+            {
+                return null;
+            }
+
+            var match = RegexObjects.FindAllProjectCount.Match(html);
+
+            if (match.Success && long.TryParse(match.Groups[1].Value, out var result))
+            {
+                return result;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        Task<string?> DownloadMyStuff()
+        {
+            if (!LoggedIn)
+            {
+                return Task.FromResult<string?>(null);
+            }
+            try
+            {
+                return DownloadWebSite("https://scratch.mit.edu/mystuff/");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to download My Stuff page, {e}");
+                return Task.FromResult<string?>(null);
+            }
+        }
+
+        Task<string?> DownloadUserSite(string username)
+        {
+            try
+            {
+                return DownloadWebSite($"https://scratch.mit.edu/users/{username}/");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to download site data for user {username}, {e}");
+                return Task.FromResult<string?>(null);
+            }
+            /*try
+            {
+                using (var siteStream = await DownloadFromURL($"https://scratch.mit.edu/users/{username}/"))
+                {
+                    using (var reader = new StreamReader(siteStream))
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to download site data for user {username}, {e}");
+                return null;
+            }*/
+        }
+
+        async Task<string?> DownloadWebSite(string url)
+        {
+            using (var siteStream = await DownloadFromURL(url))
+            {
+                using (var reader = new StreamReader(siteStream))
+                {
+                    return await reader.ReadToEndAsync();
+                }
+            }
         }
 
         #endregion

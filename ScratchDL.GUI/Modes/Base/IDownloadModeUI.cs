@@ -10,7 +10,7 @@ namespace ScratchDL.GUI
         static Type? _genericUIType;
         public static Type GenericUIType => _genericUIType ??= typeof(MainWindowViewModel).GetNestedTypes().First();
 
-        DownloadMode? ModeObject { get; }
+        DownloadMode ModeObject { get; }
 
         Type ModeType { get; }
 

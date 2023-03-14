@@ -13,7 +13,7 @@ namespace ScratchDL.GUI
     {
         public readonly T ModeObject;
 
-        DownloadMode? IDownloadModeUI.ModeObject => ModeObject;
+        DownloadMode IDownloadModeUI.ModeObject => ModeObject;
 
         public DownloadModeUI(T modeObject) => ModeObject = modeObject;
 

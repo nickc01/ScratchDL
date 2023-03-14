@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls.Primitives;
+﻿using Avalonia.Collections;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
 using ReactiveUI;
 using ScratchDL.GUI.Views;
@@ -35,7 +36,7 @@ namespace ScratchDL.GUI.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedModeIndex, value);
-                OnModeSelection(value);
+                //OnModeSelection(value);
             }
         }
 
@@ -43,35 +44,55 @@ namespace ScratchDL.GUI.ViewModels
 
         public bool LoggedIn => api.LoggedIn;
 
-        bool _showDownloadProgressBar = true;
+        bool _showDownloadProgressBar = false;
         public bool ShowDownloadProgressBar
         {
             get => _showDownloadProgressBar;
             set => this.RaiseAndSetIfChanged(ref _showDownloadProgressBar, value);
         }
 
-        float _downloadProgress = 0f;
-        public float DownloadProgress
+        double _downloadProgress = 0f;
+        public double DownloadProgress
         {
             get => _downloadProgress;
-            set => this.RaiseAndSetIfChanged(ref _downloadProgress, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _downloadProgress, value);
+                Debug.WriteLine("Progress = " + _downloadProgress);
+            }
+        }
+
+        string _downloadError = string.Empty;
+        public string DownloadError
+        {
+            get => _downloadError;
+            set => this.RaiseAndSetIfChanged(ref _downloadError, value);
+        }
+
+        bool _displayDownloadError = false;
+        public bool DisplayDownloadError
+        {
+            get => _displayDownloadError;
+            set => this.RaiseAndSetIfChanged(ref _displayDownloadError, value);
         }
 
         public List<DownloadMode> Modes;
 
-        public List<ProjectEntry> ProjectEntries { get; private set; } = new List<ProjectEntry>();
+        public AvaloniaList<ProjectEntry> ProjectEntries { get; private set; } = new AvaloniaList<ProjectEntry>();
 
-
+        public ICommand BeginDownloadCommand { get; private set; }
+        public ICommand SelectAllCommand { get; private set; }
 
         public MainWindowViewModel()
         {
-            
+            BeginDownloadCommand = ReactiveCommand.CreateFromTask(BeginDownloadData);
+            SelectAllCommand = ReactiveCommand.Create(SelectAllEntries);
         }
 
-        public void OnModeSelection(int modeIndex)
+        /*public void OnModeSelection(int modeIndex)
         {
-            Debug.WriteLine("Current Mode = " + modeIndex);
-        }
+
+        }*/
 
         public async Task Login(string username, string password)
         {
@@ -125,11 +146,17 @@ namespace ScratchDL.GUI.ViewModels
             return removed;
         }
 
+        public void AddProjectEntry(ProjectEntry entry)
+        {
+            Debug.WriteLine("ProjecT Added");
+            ProjectEntries.Add(entry);
+            this.RaisePropertyChanged(nameof(ProjectEntries));
+        }
+
         public ProjectEntry AddProjectEntry(long id, string name, string creator)
         {
             var entry = new ProjectEntry(true, id, name, creator);
-            ProjectEntries.Add(entry);
-            this.RaisePropertyChanged(nameof(ProjectEntries));
+            AddProjectEntry(entry);
             return entry;
         }
 
@@ -153,6 +180,45 @@ namespace ScratchDL.GUI.ViewModels
             else
             {
                 return false;
+            }
+        }
+
+        public void SelectAllEntries()
+        {
+            var allSelected = ProjectEntries.AsParallel().All(e => e.Selected);
+            Debug.WriteLine("All Selected = " + allSelected);
+            Parallel.For(0, ProjectEntries.Count, i =>
+            {
+                ProjectEntries[i].Selected = !allSelected;
+            });
+            this.RaisePropertyChanged(nameof(ProjectEntries));
+        }
+
+        public async Task BeginDownloadData()
+        {
+            var selectedMode = Modes[SelectedModeIndex];
+
+            ProjectEntries.Clear();
+            DisplayDownloadError = false;
+            DownloadProgress = 0f;
+            ShowDownloadProgressBar = true;
+            var uiLock = LockUI();
+
+            try
+            {
+                await selectedMode.Download(api, entry => AddProjectEntry(entry), progress => DownloadProgress = Math.Clamp(progress, 0f, 100f));
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                DownloadError = e.Message;
+                DisplayDownloadError = true;
+            }
+            finally
+            {
+                UnlockUI(uiLock);
+                ShowDownloadProgressBar = false;
+                DownloadProgress = 0f;
             }
         }
     }
