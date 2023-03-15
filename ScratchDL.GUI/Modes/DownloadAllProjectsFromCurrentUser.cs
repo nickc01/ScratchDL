@@ -4,6 +4,7 @@ using ScratchDL.GUI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,15 +38,19 @@ namespace ScratchDL.GUI.Modes
 
             await foreach (var project in api.GetAllProjectsByCurrentUser())
             {
-                Debug.WriteLine("Project = " + project.fields.title);
                 downloadedProjects.Add(project);
                 addEntry(new ProjectEntry(true,project.id,project.fields.title,project.fields.creator.username));
                 setProgress(100.0 * (downloadedProjects.Count / (double)totalCount.Value));
             }
         }
 
-        public override Task Export(IEnumerable<long> selectedIDs)
+        public override Task Export(DirectoryInfo folderPath, IEnumerable<long> selectedIDs)
         {
+            var projectsToExport = downloadedProjects.IntersectBy(selectedIDs, p => p.id).ToArray();
+
+            Debug.WriteLine("Folder = " + folderPath.FullName);
+            Debug.WriteLine("Projects To Export = " + projectsToExport.Length);
+
             return Task.CompletedTask;
         }
     }

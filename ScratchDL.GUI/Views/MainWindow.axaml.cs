@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ScratchDL.GUI.Views
 {
@@ -53,6 +54,24 @@ namespace ScratchDL.GUI.Views
 
             var loginButton = this.FindControl<Button>("login_button");
             loginButton.Click += DisplayLoginWindow;
+
+            var exportButton = this.FindControl<Button>("export_button");
+            exportButton.Click += ExportProjects;
+        }
+
+        void ExportProjects(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            Task.Run(ExportProjectsAsync);
+        }
+
+        private async Task ExportProjectsAsync()
+        {
+            var folderDialog = new OpenFolderDialog();
+            var folderPath = await folderDialog.ShowAsync(this);
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                export_button.Command?.Execute(folderPath);
+            }
         }
 
         private void DisplayLoginWindow(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

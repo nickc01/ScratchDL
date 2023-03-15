@@ -6,7 +6,9 @@ using ScratchDL.GUI.Views;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reactive;
 using System.Reflection;
 using System.Resources;
@@ -82,11 +84,15 @@ namespace ScratchDL.GUI.ViewModels
 
         public ICommand BeginDownloadCommand { get; private set; }
         public ICommand SelectAllCommand { get; private set; }
+        public ICommand ExportProjectsCommand { get; private set; }
+
+        DownloadMode? currentMode;
 
         public MainWindowViewModel()
         {
-            BeginDownloadCommand = ReactiveCommand.CreateFromTask(BeginDownloadData);
+            BeginDownloadCommand = ReactiveCommand.CreateFromTask(DownloadProjects);
             SelectAllCommand = ReactiveCommand.Create(SelectAllEntries);
+            ExportProjectsCommand = ReactiveCommand.CreateFromTask<string>(ExportProjects);
         }
 
         /*public void OnModeSelection(int modeIndex)
@@ -148,7 +154,6 @@ namespace ScratchDL.GUI.ViewModels
 
         public void AddProjectEntry(ProjectEntry entry)
         {
-            Debug.WriteLine("ProjecT Added");
             ProjectEntries.Add(entry);
             this.RaisePropertyChanged(nameof(ProjectEntries));
         }
@@ -186,7 +191,6 @@ namespace ScratchDL.GUI.ViewModels
         public void SelectAllEntries()
         {
             var allSelected = ProjectEntries.AsParallel().All(e => e.Selected);
-            Debug.WriteLine("All Selected = " + allSelected);
             Parallel.For(0, ProjectEntries.Count, i =>
             {
                 ProjectEntries[i].Selected = !allSelected;
@@ -194,9 +198,37 @@ namespace ScratchDL.GUI.ViewModels
             this.RaisePropertyChanged(nameof(ProjectEntries));
         }
 
-        public async Task BeginDownloadData()
+        public async Task ExportProjects(string? folderPath)
         {
-            var selectedMode = Modes[SelectedModeIndex];
+            if (string.IsNullOrEmpty(folderPath) || currentMode == null)
+            {
+                return;
+            }
+
+            DisplayDownloadError = false;
+
+            var uiLock = LockUI();
+
+            try
+            {
+                await currentMode.Export(new DirectoryInfo(folderPath), ProjectEntries.Where(p => p.Selected).Select(p => p.ID));
+                //await selectedMode.Download(api, entry => AddProjectEntry(entry), progress => DownloadProgress = Math.Clamp(progress, 0f, 100f));
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                DownloadError = e.Message;
+                DisplayDownloadError = true;
+            }
+            finally
+            {
+                UnlockUI(uiLock);
+            }
+        }
+
+        public async Task DownloadProjects()
+        {
+            currentMode = Modes[SelectedModeIndex];
 
             ProjectEntries.Clear();
             DisplayDownloadError = false;
@@ -206,7 +238,7 @@ namespace ScratchDL.GUI.ViewModels
 
             try
             {
-                await selectedMode.Download(api, entry => AddProjectEntry(entry), progress => DownloadProgress = Math.Clamp(progress, 0f, 100f));
+                await currentMode.Download(api, entry => AddProjectEntry(entry), progress => DownloadProgress = Math.Clamp(progress, 0f, 100f));
             }
             catch (Exception e)
             {

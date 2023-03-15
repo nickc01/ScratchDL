@@ -70,7 +70,7 @@
 			</DataGrid>
 		</Grid>
 		<StackPanel Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="2" Height="44" VerticalAlignment="Bottom">
-			<Button Content="Select All" Command="{CompiledBinding SelectAllCommand}" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+			<Button Content="Select All" Command="{CompiledBinding SelectAllCommand}" IsEnabled="{CompiledBinding !UILocked}" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
 					<MultiBinding Converter="{x:Static BoolConverters.And}">
 						<CompiledBinding Path="!UILocked" />
@@ -78,7 +78,7 @@
 					</MultiBinding>
 				</Button.IsEnabled>
 			</Button>
-			<Button Content="Export Selected" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+			<Button Name="export_button" Command="{CompiledBinding ExportProjectsCommand}" Content="Export Selected" IsEnabled="{CompiledBinding !UILocked}" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
 					<MultiBinding Converter="{x:Static BoolConverters.And}">
 						<CompiledBinding Path="!UILocked" />
