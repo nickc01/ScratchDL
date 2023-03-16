@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.GUI.Modes
 {
+
     public class DownloadAllProjectsFromCurrentUser : DownloadMode
     {
         public bool DownloadComments = true;
@@ -52,27 +53,6 @@ namespace ScratchDL.GUI.Modes
 
             int projectsExported = 0;
             List<Task> exportTasks = new List<Task>();
-            /*await Parallel.ForEachAsync(downloadedProjects, new ParallelOptions()
-            {
-                MaxDegreeOfParallelism = Environment.ProcessorCount / 2
-            }, async (project, token) =>
-            {
-                try
-                {
-                    DirectoryInfo dir = await api.DownloadAndExportProject(project.id, folderPath);
-                    if (DownloadComments)
-                    {
-                        await DownloadProjectComments(api, api.ProfileLoginInfo!.user.username, project.id, dir);
-                    }
-                    writeToConsole($"✔️ Finished : {project.fields.title}");
-                    Interlocked.Increment(ref projectsExported);
-                }
-                catch (ProjectDownloadException e)
-                {
-                    Debug.WriteLine(e);
-                    writeToConsole($"❌ Failed to download {project.fields.title}");
-                }
-            });*/
 
             foreach (var project in projectsToExport)
             {
@@ -117,8 +97,7 @@ namespace ScratchDL.GUI.Modes
 
         public override void Setup(StackPanel controlsPanel)
         {
-            var commentsCheckbox = CreateCheckbox("download_comments", "Download Comments", ModeObject.DownloadComments, b => ModeObject.DownloadComments = b);
-            controlsPanel.Children.Add(commentsCheckbox);
+            CreateAndAddCheckbox(nameof(ModeObject.DownloadComments), controlsPanel);
         }
     }
 }
