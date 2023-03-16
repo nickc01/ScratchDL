@@ -28,9 +28,6 @@ namespace ScratchDL.GUI.Modes
 
         public override async Task Download(ScratchAPI api, Action<ProjectEntry> addEntry, Action<double> setProgress)
         {
-            //int counter = 0;
-            //List<Task> downloadTasks = new();
-
             downloadedProjects.Clear();
 
             await foreach (Project project in api.GetPublishedProjects(Username))
@@ -38,35 +35,7 @@ namespace ScratchDL.GUI.Modes
                 Debug.WriteLine($"Found Project : {project.title}");
                 downloadedProjects.Add(project);
                 addEntry(new ProjectEntry(true,project.id,project.title,Username));
-
-                /*async Task Download()
-                {
-                    try
-                    {
-                        DirectoryInfo dir = await api.DownloadAndExportProject(project, directory);
-                        if (downloadComments)
-                        {
-                            await DownloadProjectComments(accessor, username, project.id, dir);
-                        }
-                        Console.WriteLine($"Downloaded Project = {project.title}");
-                    }
-                    catch (ProjectDownloadException e)
-                    {
-                        Console.WriteLine(e.Message);
-                    }
-                }
-
-                downloadTasks.Add(Download());
-
-                counter++;*/
             }
-
-            //await WriteTextToFile(Helpers.PathAddBackslash(directory.FullName) + "projects.json", JsonSerializer.Serialize(foundProjects, new JsonSerializerOptions() { WriteIndented = true }));
-
-
-            //await Task.WhenAll(downloadTasks);
-
-            //Console.WriteLine($"{counter} Projects Downloaded");
         }
 
         public override async Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole, Action<double> setProgress)
@@ -86,7 +55,7 @@ namespace ScratchDL.GUI.Modes
                         DirectoryInfo dir = await api.DownloadAndExportProject(project.id, folderPath);
                         if (DownloadComments)
                         {
-                            await DownloadProjectComments(api, api.ProfileLoginInfo!.user.username, project.id, dir);
+                            await DownloadProjectComments(api, Username, project.id, dir);
                         }
                         var value = Interlocked.Increment(ref projectsExported);
                         writeToConsole($"✔️ Finished : {project.title}");
