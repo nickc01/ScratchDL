@@ -1,12 +1,14 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
+using Avalonia.Media.Imaging;
 using ReactiveUI;
 using ScratchDL.GUI.Views;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -19,7 +21,6 @@ using System.Windows.Input;
 
 namespace ScratchDL.GUI.ViewModels
 {
-
     public class MainWindowViewModel : ViewModelBase, ILoginable
     {
         HashSet<Guid> currentUILocks = new();
@@ -89,26 +90,12 @@ namespace ScratchDL.GUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _exportConsoleVisible, value);
         }
 
-        //ReaderWriterLockSlim consoleTextLock = new ReaderWriterLockSlim();
-        object consoleTextLock = new object();
-        /*string _exportConsoleText = string.Empty;
-        public string ExportConsoleText
+        string? _profileImage = null;
+        public string? ProfileImage
         {
-            get
-            {
-                lock (consoleTextLock)
-                {
-                    return _exportConsoleText;
-                }
-            }
-            set
-            {
-                lock (consoleTextLock)
-                {
-                    this.RaiseAndSetIfChanged(ref _exportConsoleText, value);
-                }
-            }
-        }*/
+            get => _profileImage;
+            set => this.RaiseAndSetIfChanged(ref _profileImage, value);
+        }
 
         public AvaloniaList<string> ExportConsoleText { get; private set; } = new AvaloniaList<string>();
         public List<DownloadMode>? Modes;
@@ -148,6 +135,8 @@ namespace ScratchDL.GUI.ViewModels
                     await api.Login(username, password);
 
                     LoggedInUser = api.ProfileLoginInfo!.user.username;
+
+                    DownloadProfileImageAsync(api.ProfileLoginInfo!.user.id);
                 }
                 catch (NoInternetException e)
                 {
@@ -164,6 +153,17 @@ namespace ScratchDL.GUI.ViewModels
             {
                 UnlockUI(id);
             }
+        }
+
+        async Task DownloadProfileImageAsync(long userID)
+        {
+            ProfileImage = null;
+
+            using var imgStream = await api.DownloadProfileImage(userID);
+
+            ImageCache.AddImage(userID.ToString(), new Bitmap(imgStream));
+
+            ProfileImage = userID.ToString();
         }
 
         ~MainWindowViewModel() => api?.Dispose();
@@ -253,6 +253,8 @@ namespace ScratchDL.GUI.ViewModels
             ExportConsoleText.Clear();
             this.RaisePropertyChanged(nameof(ExportConsoleText));
             ExportConsoleVisible = true;
+            DownloadProgress = 0;
+            ShowDownloadProgressBar = true;
 
             try
             {
@@ -260,12 +262,13 @@ namespace ScratchDL.GUI.ViewModels
                 Exception? thrownException = null;
 
                 ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
+                ConcurrentQueue<double> progressQueue = new ConcurrentQueue<double>();
 
                 async Task ExportThread()
                 {
                     try
                     {
-                        await currentMode.Export(api, new DirectoryInfo(folderPath), ProjectEntries.Where(p => p.Selected).Select(p => p.ID), messageQueue.Enqueue);
+                        await currentMode.Export(api, new DirectoryInfo(folderPath), ProjectEntries.Where(p => p.Selected).Select(p => p.ID), messageQueue.Enqueue, progressQueue.Enqueue);
                     }
                     catch (Exception e)
                     {
@@ -292,6 +295,15 @@ namespace ScratchDL.GUI.ViewModels
                     {
                         this.RaisePropertyChanged(nameof(ExportConsoleText));
                     }
+                    double currentProgress = -1;
+                    while (progressQueue.TryDequeue(out var result))
+                    {
+                        currentProgress = result;
+                    }
+                    if (currentProgress > -1)
+                    {
+                        DownloadProgress = currentProgress;
+                    }
                 }
 
                 if (thrownException != null)
@@ -310,6 +322,8 @@ namespace ScratchDL.GUI.ViewModels
             }
             finally
             {
+                ShowDownloadProgressBar = false;
+                DownloadProgress = 0;
                 UnlockUI(uiLock);
             }
         }

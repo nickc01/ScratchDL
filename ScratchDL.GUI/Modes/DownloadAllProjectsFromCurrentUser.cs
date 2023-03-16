@@ -46,7 +46,7 @@ namespace ScratchDL.GUI.Modes
             }
         }
 
-        public override async Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole)
+        public override async Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole, Action<double> setProgress)
         {
             var projectsToExport = downloadedProjects.IntersectBy(selectedIDs, p => p.id).ToArray();
 
@@ -86,8 +86,9 @@ namespace ScratchDL.GUI.Modes
                         {
                             await DownloadProjectComments(api, api.ProfileLoginInfo!.user.username, project.id, dir);
                         }
-                        Interlocked.Increment(ref projectsExported);
+                        var value = Interlocked.Increment(ref projectsExported);
                         writeToConsole($"✔️ Finished : {project.fields.title}");
+                        setProgress(100.0 * (value / (double)projectsToExport.Length));
                     }
                     catch (ProjectDownloadException e)
                     {

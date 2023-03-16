@@ -8,7 +8,7 @@
     {
         public record class UserInfo
         (
-            int id,
+            long id,
             bool banned,
             string username,
             string token,

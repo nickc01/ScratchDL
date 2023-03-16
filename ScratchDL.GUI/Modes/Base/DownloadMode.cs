@@ -30,7 +30,7 @@ namespace ScratchDL.GUI
 
         public abstract Task Download(ScratchAPI api, Action<ProjectEntry> addEntry, Action<double> setProgress);
 
-        public abstract Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole);
+        public abstract Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole, Action<double> setProgress);
 
         protected static async Task DownloadProjectComments(ScratchAPI api, string username, long project_id, DirectoryInfo directory)
         {

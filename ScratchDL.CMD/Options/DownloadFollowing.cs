@@ -44,10 +44,10 @@ namespace ScratchDL.CMD.Options
                     KeyValuePair<string, string> image = followingUser.profile.images.MaxBy(kv => int.Parse(kv.Key.Split('x')[0]));
 
                     {
-                        Stream imgStream = await accessor.DownloadFromURL(image.Value);
+                        using Stream imgStream = await accessor.DownloadProfileImage(followingUser.id);
 
-                        using FileStream pngFile = File.Open(Helpers.PathAddBackslash(subDir.FullName) + "thumbnail.gif", FileMode.Open, FileAccess.Write);
-                        using FileStream gifFile = File.Open(Helpers.PathAddBackslash(subDir.FullName) + "thumbnail.png", FileMode.Open, FileAccess.Write);
+                        using FileStream pngFile = await Helpers.WaitTillFileAvailable(Helpers.PathAddBackslash(subDir.FullName) + "thumbnail.gif", FileMode.Create, FileAccess.Write);
+                        using FileStream gifFile = await Helpers.WaitTillFileAvailable(Helpers.PathAddBackslash(subDir.FullName) + "thumbnail.png", FileMode.Create, FileAccess.Write);
 
                         await imgStream.CopyToAsync(pngFile);
 
@@ -56,7 +56,7 @@ namespace ScratchDL.CMD.Options
                         await imgStream.CopyToAsync(gifFile);
                     }
 
-                    using FileStream jsonFile = File.Create(Helpers.PathAddBackslash(subDir.FullName) + "info.json");
+                    using FileStream jsonFile = await Helpers.WaitTillFileAvailable(Helpers.PathAddBackslash(subDir.FullName) + "info.json", FileMode.Create, FileAccess.Write);
 
                     using StreamWriter writer = new(jsonFile);
 

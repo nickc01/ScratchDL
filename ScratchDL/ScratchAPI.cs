@@ -817,6 +817,24 @@ namespace ScratchDL
             }
         }
 
+        public async Task<Stream?> DownloadProfileImage(string username)
+        {
+            var userInfo = await GetUserInfo(username);
+            if (userInfo == null)
+            {
+                return null;
+            }
+            else
+            {
+                return await DownloadProfileImage(userInfo.id);
+            }
+        }
+
+        public Task<Stream> DownloadProfileImage(long userID)
+        {
+            return DownloadFromURL($"https://uploads.scratch.mit.edu/get_image/user/{userID}_512x512.png");
+        }
+
         /// <summary>
         /// Gets all the users that are following a certain user
         /// </summary>
@@ -1365,7 +1383,7 @@ namespace ScratchDL
                 template.Replace("%thumbnail%", "");
             }
 
-            using (var infoFileStream = File.Open(Helpers.PathAddBackslash(projectSubDir.FullName) + "Info.md", FileMode.Create, FileAccess.Write))
+            using (var infoFileStream = await Helpers.WaitTillFileAvailable(Helpers.PathAddBackslash(projectSubDir.FullName) + "Info.md", FileMode.Create, FileAccess.Write))
             {
                 using (var writer = new StreamWriter(infoFileStream))
                 {

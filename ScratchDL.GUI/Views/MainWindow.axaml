@@ -3,6 +3,7 @@
         xmlns:vm="using:ScratchDL.GUI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:local="clr-namespace:ScratchDL.GUI;assembly=ScratchDL.GUI"
         mc:Ignorable="d" d:DesignWidth="875" d:DesignHeight="450"
         x:Class="ScratchDL.GUI.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
@@ -11,7 +12,10 @@
 		MinHeight="600"
 		Background="#1f2022"
 		x:DataType="vm:MainWindowViewModel">
-
+	<Window.Resources>
+		<local:CachedImageBitmapConverter x:Key="cachedImageConverter" />
+	</Window.Resources>
+	
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
@@ -40,7 +44,7 @@
 		<StackPanel Grid.Row="0" Grid.Column="2" HorizontalAlignment="Right" Spacing="10" Orientation="Horizontal">
 			<TextBlock Text="{CompiledBinding LoggedInUser}" VerticalAlignment="Center"></TextBlock>
 			<Button Name="login_button" IsEnabled="{CompiledBinding !UILocked}" FontSize="20" VerticalContentAlignment="Center" VerticalAlignment="Stretch" Margin="0 0 0 0">Login</Button>
-			<Rectangle Fill="White" Width="44"/>
+			<Image Source="{Binding ProfileImage,Converter={StaticResource cachedImageConverter}}" Width="44"></Image>
 		</StackPanel>
 		<ScrollViewer Margin="0 0 0 54" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 			<StackPanel Name="mode_controls_section" Margin="5" Spacing="3">
@@ -105,7 +109,7 @@
 				</DataGrid.Columns>
 			</DataGrid>
 		</Grid>
-		<Button IsEnabled="{CompiledBinding ExportConsoleVisible}" IsVisible="{CompiledBinding ExportConsoleVisible}" Command="{CompiledBinding CloseExportConsoleCommand}" Margin="5" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="2" Grid.Column="2">Close</Button>
+		<Button IsEnabled="{CompiledBinding ExportConsoleVisible}" IsVisible="{CompiledBinding ExportConsoleVisible}" Command="{CompiledBinding CloseExportConsoleCommand}" Margin="20" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="2" Grid.Column="2">Close</Button>
 	</Grid>
 	
 </Window>
