@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Data;
+using ScratchDL.Enums;
 using ScratchDL.GUI.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ScratchDL.GUI.Modes
@@ -44,15 +46,68 @@ namespace ScratchDL.GUI.Modes
             }
         }
 
-        public override Task Export(DirectoryInfo folderPath, IEnumerable<long> selectedIDs)
+        public override async Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole)
         {
             var projectsToExport = downloadedProjects.IntersectBy(selectedIDs, p => p.id).ToArray();
 
-            Debug.WriteLine("Folder = " + folderPath.FullName);
-            Debug.WriteLine("Projects To Export = " + projectsToExport.Length);
+            int projectsExported = 0;
+            List<Task> exportTasks = new List<Task>();
+            /*await Parallel.ForEachAsync(downloadedProjects, new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount / 2
+            }, async (project, token) =>
+            {
+                try
+                {
+                    DirectoryInfo dir = await api.DownloadAndExportProject(project.id, folderPath);
+                    if (DownloadComments)
+                    {
+                        await DownloadProjectComments(api, api.ProfileLoginInfo!.user.username, project.id, dir);
+                    }
+                    writeToConsole($"✔️ Finished : {project.fields.title}");
+                    Interlocked.Increment(ref projectsExported);
+                }
+                catch (ProjectDownloadException e)
+                {
+                    Debug.WriteLine(e);
+                    writeToConsole($"❌ Failed to download {project.fields.title}");
+                }
+            });*/
 
-            return Task.CompletedTask;
+            foreach (var project in projectsToExport)
+            {
+
+                async Task DownloadProject(GalleryProject project)
+                {
+                    try
+                    {
+                        DirectoryInfo dir = await api.DownloadAndExportProject(project.id, folderPath);
+                        if (DownloadComments)
+                        {
+                            await DownloadProjectComments(api, api.ProfileLoginInfo!.user.username, project.id, dir);
+                        }
+                        Interlocked.Increment(ref projectsExported);
+                        writeToConsole($"✔️ Finished : {project.fields.title}");
+                    }
+                    catch (ProjectDownloadException e)
+                    {
+                        Debug.WriteLine(e);
+                        writeToConsole($"❌ Failed to download {project.fields.title}");
+                    }
+                }
+                exportTasks.Add(DownloadProject(project));
+            }
+
+            /*foreach (var task in exportTasks)
+            {
+                var message = await task;
+                writeToConsole(message);
+            }*/
+            await Task.WhenAll(exportTasks);
+            Console.WriteLine($"Done Exporting - {projectsExported} projects exported");
         }
+
+
     }
 
     public class DownloadAllProjectsFromCurrentUserUI : DownloadModeUI<DownloadAllProjectsFromCurrentUser>

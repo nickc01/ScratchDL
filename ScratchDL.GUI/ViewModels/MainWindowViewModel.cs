@@ -4,6 +4,7 @@ using Avalonia.Data.Converters;
 using ReactiveUI;
 using ScratchDL.GUI.Views;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +13,7 @@ using System.Net.Sockets;
 using System.Reactive;
 using System.Reflection;
 using System.Resources;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -78,13 +80,45 @@ namespace ScratchDL.GUI.ViewModels
             set => this.RaiseAndSetIfChanged(ref _displayDownloadError, value);
         }
 
-        public List<DownloadMode> Modes;
+
+
+        bool _exportConsoleVisible = false;
+        public bool ExportConsoleVisible
+        {
+            get => _exportConsoleVisible;
+            set => this.RaiseAndSetIfChanged(ref _exportConsoleVisible, value);
+        }
+
+        //ReaderWriterLockSlim consoleTextLock = new ReaderWriterLockSlim();
+        object consoleTextLock = new object();
+        /*string _exportConsoleText = string.Empty;
+        public string ExportConsoleText
+        {
+            get
+            {
+                lock (consoleTextLock)
+                {
+                    return _exportConsoleText;
+                }
+            }
+            set
+            {
+                lock (consoleTextLock)
+                {
+                    this.RaiseAndSetIfChanged(ref _exportConsoleText, value);
+                }
+            }
+        }*/
+
+        public AvaloniaList<string> ExportConsoleText { get; private set; } = new AvaloniaList<string>();
+        public List<DownloadMode>? Modes;
 
         public AvaloniaList<ProjectEntry> ProjectEntries { get; private set; } = new AvaloniaList<ProjectEntry>();
 
         public ICommand BeginDownloadCommand { get; private set; }
         public ICommand SelectAllCommand { get; private set; }
         public ICommand ExportProjectsCommand { get; private set; }
+        public ICommand CloseExportConsoleCommand { get; private set; }
 
         DownloadMode? currentMode;
 
@@ -93,12 +127,9 @@ namespace ScratchDL.GUI.ViewModels
             BeginDownloadCommand = ReactiveCommand.CreateFromTask(DownloadProjects);
             SelectAllCommand = ReactiveCommand.Create(SelectAllEntries);
             ExportProjectsCommand = ReactiveCommand.CreateFromTask<string>(ExportProjects);
+            CloseExportConsoleCommand = ReactiveCommand.Create(CloseExportConsole);
+
         }
-
-        /*public void OnModeSelection(int modeIndex)
-        {
-
-        }*/
 
         public async Task Login(string username, string password)
         {
@@ -126,6 +157,7 @@ namespace ScratchDL.GUI.ViewModels
                 catch (LoginException e)
                 {
                     LoggedInUser = "Invalid Credentials. Try Again";
+                    Debug.WriteLine(e);
                 }
             }
             finally
@@ -198,6 +230,16 @@ namespace ScratchDL.GUI.ViewModels
             this.RaisePropertyChanged(nameof(ProjectEntries));
         }
 
+        /*public void WriteExportConsoleEntry(string str)
+        {
+            lock (consoleTextLock)
+            {
+                Debug.WriteLine("ENTRY = " + str);
+                ExportConsoleText.Add(new ConsoleEntry(str));
+                this.RaisePropertyChanged(nameof(ExportConsoleText));
+            }
+        }*/
+
         public async Task ExportProjects(string? folderPath)
         {
             if (string.IsNullOrEmpty(folderPath) || currentMode == null)
@@ -208,17 +250,63 @@ namespace ScratchDL.GUI.ViewModels
             DisplayDownloadError = false;
 
             var uiLock = LockUI();
+            ExportConsoleText.Clear();
+            this.RaisePropertyChanged(nameof(ExportConsoleText));
+            ExportConsoleVisible = true;
 
             try
             {
-                await currentMode.Export(new DirectoryInfo(folderPath), ProjectEntries.Where(p => p.Selected).Select(p => p.ID));
-                //await selectedMode.Download(api, entry => AddProjectEntry(entry), progress => DownloadProgress = Math.Clamp(progress, 0f, 100f));
+                bool done = false;
+                Exception? thrownException = null;
+
+                ConcurrentQueue<string> messageQueue = new ConcurrentQueue<string>();
+
+                async Task ExportThread()
+                {
+                    try
+                    {
+                        await currentMode.Export(api, new DirectoryInfo(folderPath), ProjectEntries.Where(p => p.Selected).Select(p => p.ID), messageQueue.Enqueue);
+                    }
+                    catch (Exception e)
+                    {
+                        thrownException = e;
+                    }
+                    finally
+                    {
+                        done = true;
+                    }
+                }
+
+                Task.Run(ExportThread);
+
+                while (!done)
+                {
+                    await Task.Delay(50);
+                    int newMessages = 0;
+                    while (messageQueue.TryDequeue(out var message))
+                    {
+                        newMessages++;
+                        ExportConsoleText.Add(message);
+                    }
+                    if (newMessages > 0)
+                    {
+                        this.RaisePropertyChanged(nameof(ExportConsoleText));
+                    }
+                }
+
+                if (thrownException != null)
+                {
+                    throw thrownException;
+                }
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e);
                 DownloadError = e.Message;
                 DisplayDownloadError = true;
+#if DEBUG
+                throw;
+#endif
             }
             finally
             {
@@ -226,14 +314,26 @@ namespace ScratchDL.GUI.ViewModels
             }
         }
 
+        public void CloseExportConsole()
+        {
+            ExportConsoleVisible = false;
+        }
+
         public async Task DownloadProjects()
         {
+            if (Modes == null)
+            {
+                return;
+            }
             currentMode = Modes[SelectedModeIndex];
 
             ProjectEntries.Clear();
             DisplayDownloadError = false;
             DownloadProgress = 0f;
             ShowDownloadProgressBar = true;
+            ExportConsoleVisible = false;
+            ExportConsoleText.Clear();
+            this.RaisePropertyChanged(nameof(ExportConsoleText));
             var uiLock = LockUI();
 
             try

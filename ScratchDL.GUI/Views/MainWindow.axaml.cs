@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using DynamicData;
 using ScratchDL.GUI.ViewModels;
@@ -61,7 +62,7 @@ namespace ScratchDL.GUI.Views
 
         void ExportProjects(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            Task.Run(ExportProjectsAsync);
+            ExportProjectsAsync();
         }
 
         private async Task ExportProjectsAsync()

@@ -59,7 +59,7 @@
 		<GridSplitter IsEnabled="False" Grid.Column="2" Grid.Row="1" Background="White" ResizeDirection="Rows"/>
 		<GridSplitter IsEnabled="False" Grid.Column="1" Grid.Row="1" Background="White" ResizeDirection="Rows"/>
 
-		<Grid Margin="0 0 0 54" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch">
+		<Grid Margin="0 0 0 54" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch" IsEnabled="{CompiledBinding !ExportConsoleVisible}" IsVisible="{CompiledBinding !ExportConsoleVisible}">
 			<DataGrid Name="MyDataGrid" SelectionMode="Single" Items="{CompiledBinding ProjectEntries}" AutoGenerateColumns="False" >
 				<DataGrid.Columns>
 					<DataGridCheckBoxColumn Header="Selected" Binding="{Binding Selected}" />
@@ -87,6 +87,25 @@
 				</Button.IsEnabled>
 			</Button>
 		</StackPanel>
+		<!--<TextBlock Text="{CompiledBinding ExportConsoleText}" VerticalAlignment="Stretch" FontSize="16" Padding="5"/>-->
+		<!--<ScrollViewer IsVisible="{CompiledBinding ExportConsoleVisible}" Grid.Row="2" Grid.Column="2" Background="Black">
+			
+		</ScrollViewer>-->
+		<Grid IsEnabled="{CompiledBinding ExportConsoleVisible}" IsVisible="{CompiledBinding ExportConsoleVisible}" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch" Background="Black">
+			<DataGrid Grid.Row="2" Grid.Column="2" CanUserReorderColumns="False"
+						  CanUserResizeColumns="False"
+						  CanUserSortColumns="False"
+						  Name="console_grid"
+						  SelectionMode="Single"
+						  Items="{CompiledBinding ExportConsoleText}"
+						  HeadersVisibility="None"
+						  AutoGenerateColumns="False">
+				<DataGrid.Columns>
+					<DataGridTextColumn IsReadOnly="True" Binding="{Binding}" />
+				</DataGrid.Columns>
+			</DataGrid>
+		</Grid>
+		<Button IsEnabled="{CompiledBinding ExportConsoleVisible}" IsVisible="{CompiledBinding ExportConsoleVisible}" Command="{CompiledBinding CloseExportConsoleCommand}" Margin="5" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="2" Grid.Column="2">Close</Button>
 	</Grid>
 	
 </Window>
