@@ -14,9 +14,19 @@ namespace ScratchDL
 		bool comments_allowed,
 		string image,
 		Studio.History history
-	)
-	{
-		public record class History(
+	) : IStudio
+    {
+		long IStudio.ID => id;
+
+		string IStudio.Title => title;
+
+		DateTime IStudio.DateCreated => history.created;
+
+		DateTime IStudio.DateModified => history.modified;
+
+		string IStudio.ThumbnailURL => image;
+
+        public record class History(
 			DateTime created,
 			DateTime modified
 		);

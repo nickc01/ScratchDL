@@ -100,6 +100,10 @@ namespace ScratchDL.GUI.Views
 
             modeControlsSection.Children.Add(descriptionBlock);
 
+            MyDataGrid.Columns[0].Header = modeUI.Column1;
+            MyDataGrid.Columns[0].Header = modeUI.Column2;
+            MyDataGrid.Columns[0].Header = modeUI.Column3;
+
             modeUI.Setup(modeControlsSection);
         }
 

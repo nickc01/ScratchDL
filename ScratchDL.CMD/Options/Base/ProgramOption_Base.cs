@@ -84,15 +84,6 @@ namespace ScratchDL.CMD.Options.Base
             }
         }
 
-        protected static async Task WriteTextToFile(string filePath, string contents)
-        {
-            using (var fileStream = await Helpers.WaitTillFileAvailable(filePath,FileMode.Create,FileAccess.Write))
-            {
-                using (var writer = new StreamWriter(fileStream))
-                {
-                    await writer.WriteAsync(contents);
-                }
-            }
-        }
+        protected static Task WriteTextToFile(string filePath, string contents) => Helpers.WriteTextToFile(filePath, contents);
     }
 }

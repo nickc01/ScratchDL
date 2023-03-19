@@ -25,6 +25,10 @@ namespace ScratchDL.GUI
 
         void IDownloadModeUI.Setup(StackPanel controlPanel) => Setup(controlPanel);
 
+        public virtual string Column1 => "ID";
+        public virtual string Column2 => "Name";
+        public virtual string Column3 => "Creator";
+
         protected CheckBox CreateCheckbox(string name, string text, bool defaultState, Action<bool> onValueChanged)
         {
             var checkbox = new CheckBox();

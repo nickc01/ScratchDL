@@ -100,12 +100,34 @@ namespace ScratchDL.GUI.ViewModels
         public AvaloniaList<string> ExportConsoleText { get; private set; } = new AvaloniaList<string>();
         public List<DownloadMode>? Modes;
 
-        public AvaloniaList<ProjectEntry> ProjectEntries { get; private set; } = new AvaloniaList<ProjectEntry>();
+        /*string _firstColumnName = "ID";
+        public string FirstColumnName
+        {
+            get => _firstColumnName;
+            set => _firstColumnName = value;
+        }
+
+        string _secondColumnName = "Name";
+        public string SecondColumnName
+        {
+            get => _secondColumnName;
+            set => _secondColumnName = value;
+        }
+
+        string _thirdColumnName = "Creator";
+        public string ThirdColumnName
+        {
+            get => _thirdColumnName;
+            set => _thirdColumnName = value;
+        }*/
+
+        public AvaloniaList<DownloadEntry> DownloadEntries { get; private set; } = new AvaloniaList<DownloadEntry>();
 
         public ICommand BeginDownloadCommand { get; private set; }
         public ICommand SelectAllCommand { get; private set; }
         public ICommand ExportProjectsCommand { get; private set; }
         public ICommand CloseExportConsoleCommand { get; private set; }
+        public ICommand ClearDownloadGridCommand { get; private set; }
 
         DownloadMode? currentMode;
 
@@ -115,7 +137,7 @@ namespace ScratchDL.GUI.ViewModels
             SelectAllCommand = ReactiveCommand.Create(SelectAllEntries);
             ExportProjectsCommand = ReactiveCommand.CreateFromTask<string>(ExportProjects);
             CloseExportConsoleCommand = ReactiveCommand.Create(CloseExportConsole);
-
+            ClearDownloadGridCommand = ReactiveCommand.Create(ClearDownloadGrid);
         }
 
         public async Task Login(string username, string password)
@@ -184,32 +206,32 @@ namespace ScratchDL.GUI.ViewModels
             return removed;
         }
 
-        public void AddProjectEntry(ProjectEntry entry)
+        public void AddProjectEntry(DownloadEntry entry)
         {
-            ProjectEntries.Add(entry);
-            this.RaisePropertyChanged(nameof(ProjectEntries));
+            DownloadEntries.Add(entry);
+            this.RaisePropertyChanged(nameof(DownloadEntries));
         }
 
-        public ProjectEntry AddProjectEntry(long id, string name, string creator)
+        public DownloadEntry AddProjectEntry(long id, string name, string creator)
         {
-            var entry = new ProjectEntry(true, id, name, creator);
+            var entry = new DownloadEntry(true, id, name, creator);
             AddProjectEntry(entry);
             return entry;
         }
 
-        public bool RemoveProjectEntry(ProjectEntry entry)
+        public bool RemoveProjectEntry(DownloadEntry entry)
         {
-            var removed = ProjectEntries.Remove(entry);
+            var removed = DownloadEntries.Remove(entry);
             if (removed)
             {
-                this.RaisePropertyChanged(nameof(ProjectEntries));
+                this.RaisePropertyChanged(nameof(DownloadEntries));
             }
             return removed;
         }
 
         public bool RemoveProjectEntry(long id)
         {
-            var foundEntry = ProjectEntries.FirstOrDefault(e => e.ID == id);
+            var foundEntry = DownloadEntries.FirstOrDefault(e => e.ID == id);
             if (foundEntry != null)
             {
                 return RemoveProjectEntry(foundEntry);
@@ -222,23 +244,13 @@ namespace ScratchDL.GUI.ViewModels
 
         public void SelectAllEntries()
         {
-            var allSelected = ProjectEntries.AsParallel().All(e => e.Selected);
-            Parallel.For(0, ProjectEntries.Count, i =>
+            var allSelected = DownloadEntries.AsParallel().All(e => e.Selected);
+            Parallel.For(0, DownloadEntries.Count, i =>
             {
-                ProjectEntries[i].Selected = !allSelected;
+                DownloadEntries[i].Selected = !allSelected;
             });
-            this.RaisePropertyChanged(nameof(ProjectEntries));
+            this.RaisePropertyChanged(nameof(DownloadEntries));
         }
-
-        /*public void WriteExportConsoleEntry(string str)
-        {
-            lock (consoleTextLock)
-            {
-                Debug.WriteLine("ENTRY = " + str);
-                ExportConsoleText.Add(new ConsoleEntry(str));
-                this.RaisePropertyChanged(nameof(ExportConsoleText));
-            }
-        }*/
 
         public async Task ExportProjects(string? folderPath)
         {
@@ -268,7 +280,15 @@ namespace ScratchDL.GUI.ViewModels
                 {
                     try
                     {
-                        await currentMode.Export(api, new DirectoryInfo(folderPath), ProjectEntries.Where(p => p.Selected).Select(p => p.ID), messageQueue.Enqueue, progressQueue.Enqueue);
+                        //currentMode.Configure(api, progressQueue.Enqueue);
+                        var exportData = new ExportData(
+                            api,
+                            progressQueue.Enqueue,
+                            new DirectoryInfo(folderPath),
+                            DownloadEntries.Where(p => p.Selected).Select(p => p.ID),
+                            messageQueue.Enqueue);
+                        await currentMode.Export(exportData);
+                        //await currentMode.Export(new DirectoryInfo(folderPath), DownloadEntries.Where(p => p.Selected).Select(p => p.ID), messageQueue.Enqueue);
                     }
                     catch (Exception e)
                     {
@@ -333,6 +353,12 @@ namespace ScratchDL.GUI.ViewModels
             ExportConsoleVisible = false;
         }
 
+        public void ClearDownloadGrid()
+        {
+            DownloadEntries.Clear();
+            this.RaisePropertyChanged(nameof(DownloadEntries));
+        }
+
         public async Task DownloadProjects()
         {
             if (Modes == null)
@@ -341,7 +367,7 @@ namespace ScratchDL.GUI.ViewModels
             }
             currentMode = Modes[SelectedModeIndex];
 
-            ProjectEntries.Clear();
+            DownloadEntries.Clear();
             DisplayDownloadError = false;
             DownloadProgress = 0f;
             ShowDownloadProgressBar = true;
@@ -352,7 +378,12 @@ namespace ScratchDL.GUI.ViewModels
 
             try
             {
-                await currentMode.Download(api, entry => AddProjectEntry(entry), progress => DownloadProgress = Math.Clamp(progress, 0f, 100f));
+                //currentMode.Configure(api, progress => DownloadProgress = Math.Clamp(progress, 0f, 100f));
+                var downloadData = new DownloadData(
+                    api,
+                    progress => DownloadProgress = Math.Clamp(progress, 0f, 100f),
+                    AddProjectEntry);
+                await currentMode.Download(downloadData);
             }
             catch (Exception e)
             {

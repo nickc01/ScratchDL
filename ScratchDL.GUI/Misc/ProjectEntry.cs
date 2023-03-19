@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ScratchDL.GUI
 {
-    public class ProjectEntry : ReactiveObject
+    public class DownloadEntry : ReactiveObject
     {
         bool _selected = true;
         public bool Selected
@@ -16,7 +16,7 @@ namespace ScratchDL.GUI
         public string Name { get; init; }
         public string Creator { get; init; }
 
-        public ProjectEntry(bool selected, long id, string name, string creator)
+        public DownloadEntry(bool selected, long id, string name, string creator)
         {
             Selected = selected;
             ID = id;
@@ -31,7 +31,7 @@ namespace ScratchDL.GUI
 
         public override bool Equals(object? obj)
         {
-            return obj is ProjectEntry otherEntry && ID == otherEntry.ID;
+            return obj is DownloadEntry otherEntry && ID == otherEntry.ID;
         }
 
         public override string ToString()

@@ -7,8 +7,18 @@ namespace ScratchDL
         [property: JsonPropertyName("pk")]
         long id,
         UserStudio.Fields fields
-    )
+    ) : IStudio
     {
+        long IStudio.ID => id;
+
+        string IStudio.Title => fields.title;
+
+        DateTime IStudio.DateCreated => fields.datetime_created;
+
+        DateTime IStudio.DateModified => fields.datetime_modified;
+
+        string IStudio.ThumbnailURL => fields.thumbnail_url;
+
         public record class Fields
         (
             int curators_count,

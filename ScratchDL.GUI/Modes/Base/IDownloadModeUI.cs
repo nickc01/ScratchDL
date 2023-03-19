@@ -15,5 +15,9 @@ namespace ScratchDL.GUI
         Type ModeType { get; }
 
         void Setup(StackPanel controlPanel);
+
+        string Column1 { get; }
+        string Column2 { get; }
+        string Column3 { get; }
     }
 }

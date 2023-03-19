@@ -1451,27 +1451,16 @@ namespace ScratchDL
         /// </summary>
         /// <param name="info">The project to get the image of</param>
         /// <returns>Returns a stream to the image data, or null if the image couldn't be downloaded</returns>
-        public async Task<Stream?> DownloadProjectImage(Project info)
+        public async Task<Stream?> DownloadProjectImage(IProject info)
         {
             Stream? stream = null;
             try
             {
-                stream = await DownloadFromURL(info.image);
+                stream = await DownloadFromURL(info.ThumbnailImage);
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Failed to download image of project {info.title} : {e}");
-            }
-            if (stream == null && info.images.Count > 0)
-            {
-                try
-                {
-                    stream = await DownloadFromURL(info.images.MaxBy(i => int.Parse(i.Key.Split("x")[0])).Value);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Failed to download image of project {info.title} : {e}");
-                }
+                Console.WriteLine($"Failed to download image of project {info.Title} : {e}");
             }
             return stream;
         }

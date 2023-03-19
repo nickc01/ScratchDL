@@ -12,7 +12,8 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.GUI.Modes
 {
-    public class DownloadAllSharedProjectsFromUser : DownloadMode
+
+    public class DownloadAllSharedProjectsFromUser : ProjectDownloadMode
     {
         public DownloadAllSharedProjectsFromUser(MainWindowViewModel viewModel) : base(viewModel) { }
 
@@ -24,23 +25,26 @@ namespace ScratchDL.GUI.Modes
 
         public bool DownloadComments = true;
 
-        List<Project> downloadedProjects = new List<Project>();
+        List<IProject> downloadedProjects = new List<IProject>();
 
-        public override async Task Download(ScratchAPI api, Action<ProjectEntry> addEntry, Action<double> setProgress)
+        public override async Task Download(DownloadData data)
         {
-            downloadedProjects.Clear();
+            downloadedProjects = await ModeUtilities.DownloadProjectBatch(data.API.GetPublishedProjects(Username),data);
+            /*downloadedProjects.Clear();
 
             await foreach (Project project in api.GetPublishedProjects(Username))
             {
                 Debug.WriteLine($"Found Project : {project.title}");
                 downloadedProjects.Add(project);
                 addEntry(new ProjectEntry(true,project.id,project.title,Username));
-            }
+            }*/
         }
 
-        public override async Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole, Action<double> setProgress)
+        public override Task Export(ExportData data)
         {
-            var projectsToExport = downloadedProjects.IntersectBy(selectedIDs, p => p.id).ToArray();
+            return ModeUtilities.ExportProjectBatch(data,downloadedProjects,DownloadComments);
+            //await ExportProjectBatch(downloadedProjects, DownloadComments, folderPath, selectedIDs, writeToConsole);
+            /*var projectsToExport = downloadedProjects.IntersectBy(selectedIDs, p => p.id).ToArray();
 
             int projectsExported = 0;
             List<Task> exportTasks = new List<Task>();
@@ -71,7 +75,7 @@ namespace ScratchDL.GUI.Modes
             }
 
             await Task.WhenAll(exportTasks);
-            Console.WriteLine($"Done Exporting - {projectsExported} projects exported");
+            Console.WriteLine($"Done Exporting - {projectsExported} projects exported");*/
         }
     }
 

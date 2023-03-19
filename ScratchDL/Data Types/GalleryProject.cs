@@ -6,8 +6,36 @@ namespace ScratchDL
         GalleryProject.Fields fields,
         string model,
         [property: JsonPropertyName("pk")] long id
-        )
+        ) : IProject
     {
+        string IProject.Title => fields.title;
+
+        long IProject.ID => id;
+
+        DateTime IProject.DateCreated => fields.datetime_created;
+
+        DateTime IProject.DateModified => fields.datetime_modified;
+
+        DateTime? IProject.DateShared => fields.datetime_shared;
+
+        string IProject.AuthorUsername => fields.creator.username;
+
+        long IProject.Views => fields.view_count;
+
+        long IProject.Loves => fields.love_count;
+
+        long IProject.Favorites => fields.favorite_count;
+
+        long IProject.Remixes => fields.remixers_count;
+
+        string IProject.ThumbnailImage => fields.thumbnail_url;
+
+        string IProject.Visibility => fields.visibility;
+
+        bool IProject.IsPublished => fields.isPublished;
+
+        long IProject.AuthorID => fields.creator.id;
+
         public record class Creator
         (
             string username,

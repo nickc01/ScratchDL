@@ -208,5 +208,16 @@ namespace ScratchDL
 
             return input;
         }
+
+        public static async Task WriteTextToFile(string filePath, string contents)
+        {
+            using (var fileStream = await WaitTillFileAvailable(filePath, FileMode.Create, FileAccess.Write))
+            {
+                using (var writer = new StreamWriter(fileStream))
+                {
+                    await writer.WriteAsync(contents);
+                }
+            }
+        }
     }
 }

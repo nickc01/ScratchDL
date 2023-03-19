@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 namespace ScratchDL.GUI.Modes
 {
 
-    public class DownloadAllProjectsFromCurrentUser : DownloadMode
+    public class DownloadAllProjectsFromCurrentUser : ProjectDownloadMode
     {
         public bool DownloadComments = true;
 
@@ -24,32 +24,45 @@ namespace ScratchDL.GUI.Modes
 
         public override string Description => "Downloads all projects from the currently logged in user\n(Make sure you login first)";
 
-        List<GalleryProject> downloadedProjects = new List<GalleryProject>();
+        List<IProject> downloadedProjects = new List<IProject>();
 
-        public override async Task Download(ScratchAPI api, Action<ProjectEntry> addEntry, Action<double> setProgress)
+        public override async Task Download(DownloadData data)
         {
             downloadedProjects.Clear();
-            if (!api.LoggedIn)
+            if (!data.API.LoggedIn)
             {
                 throw new ScratchDL.LoginException(0, "Login Required");
             }
-            var totalCount = await api.GetAllProjectCount();
+            var totalCount = await data.API.GetAllProjectCount();
             if (totalCount == null)
             {
                 throw new ScratchDL.LoginException(0, "Login Required");
             }
 
-            await foreach (var project in api.GetAllProjectsByCurrentUser())
+            downloadedProjects = await ModeUtilities.DownloadProjectBatch(ConvertGalleryProjects(data.API, data.API.GetAllProjectsByCurrentUser()),data, totalCount.Value);
+            //downloadedProjects = await DownloadProjectBatch(ConvertGalleryProjects(API.GetAllProjectsByCurrentUser()),addEntry,totalCount.Value);
+            /*await foreach (var project in api.GetAllProjectsByCurrentUser())
             {
                 downloadedProjects.Add(project);
                 addEntry(new ProjectEntry(true,project.id,project.fields.title,project.fields.creator.username));
                 setProgress(100.0 * (downloadedProjects.Count / (double)totalCount.Value));
+            }*/
+        }
+
+        async IAsyncEnumerable<Project> ConvertGalleryProjects(ScratchAPI API, IAsyncEnumerable<GalleryProject> projects)
+        {
+            await foreach (var project in projects)
+            {
+                var newProject = new Project();
+                yield return newProject with { id = project.id, title = project.fields.title, author = newProject.author with { username = API.ProfileLoginInfo!.user.username } };
             }
         }
 
-        public override async Task Export(ScratchAPI api, DirectoryInfo folderPath, IEnumerable<long> selectedIDs, Action<string> writeToConsole, Action<double> setProgress)
+        public override Task Export(ExportData exportData)
         {
-            var projectsToExport = downloadedProjects.IntersectBy(selectedIDs, p => p.id).ToArray();
+            return ModeUtilities.ExportProjectBatch(exportData, downloadedProjects, DownloadComments);
+            //await ExportProjectBatch(downloadedProjects, DownloadComments, folderPath, selectedIDs, writeToConsole);
+            /*var projectsToExport = downloadedProjects.IntersectBy(selectedIDs, p => p.id).ToArray();
 
             int projectsExported = 0;
             List<Task> exportTasks = new List<Task>();
@@ -57,7 +70,7 @@ namespace ScratchDL.GUI.Modes
             foreach (var project in projectsToExport)
             {
 
-                async Task DownloadProject(GalleryProject project)
+                async Task DownloadProject(Project project)
                 {
                     try
                     {
@@ -67,25 +80,20 @@ namespace ScratchDL.GUI.Modes
                             await DownloadProjectComments(api, api.ProfileLoginInfo!.user.username, project.id, dir);
                         }
                         var value = Interlocked.Increment(ref projectsExported);
-                        writeToConsole($"✔️ Finished : {project.fields.title}");
+                        writeToConsole($"✔️ Finished : {project.title}");
                         setProgress(100.0 * (value / (double)projectsToExport.Length));
                     }
                     catch (ProjectDownloadException e)
                     {
                         Debug.WriteLine(e);
-                        writeToConsole($"❌ Failed to download {project.fields.title}");
+                        writeToConsole($"❌ Failed to download {project.title}");
                     }
                 }
                 exportTasks.Add(DownloadProject(project));
             }
 
-            /*foreach (var task in exportTasks)
-            {
-                var message = await task;
-                writeToConsole(message);
-            }*/
             await Task.WhenAll(exportTasks);
-            Console.WriteLine($"Done Exporting - {projectsExported} projects exported");
+            Console.WriteLine($"Done Exporting - {projectsExported} projects exported");*/
         }
 
 

@@ -64,7 +64,7 @@
 		<GridSplitter IsEnabled="False" Grid.Column="1" Grid.Row="1" Background="White" ResizeDirection="Rows"/>
 
 		<Grid Margin="0 0 0 54" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch" IsEnabled="{CompiledBinding !ExportConsoleVisible}" IsVisible="{CompiledBinding !ExportConsoleVisible}">
-			<DataGrid Name="MyDataGrid" SelectionMode="Single" Items="{CompiledBinding ProjectEntries}" AutoGenerateColumns="False" >
+			<DataGrid Name="MyDataGrid" SelectionMode="Single" Items="{CompiledBinding DownloadEntries}" AutoGenerateColumns="False" >
 				<DataGrid.Columns>
 					<DataGridCheckBoxColumn Header="Selected" Binding="{Binding Selected}" />
 					<DataGridTextColumn IsReadOnly="True" Header="ID"  Binding="{Binding ID}"/>
@@ -73,20 +73,21 @@
 				</DataGrid.Columns>
 			</DataGrid>
 		</Grid>
+		<!--<Button IsEnabled="{CompiledBinding !ExportConsoleVisible}" IsVisible="{CompiledBinding !ExportConsoleVisible}" Command="{CompiledBinding ClearDownloadGridCommand}" Margin="20" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="2" Grid.Column="2">Clear</Button>-->
 		<StackPanel Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="2" Height="44" VerticalAlignment="Bottom">
-			<Button Content="Select All" Command="{CompiledBinding SelectAllCommand}" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+			<Button Content="Select All" Command="{CompiledBinding SelectAllCommand}" IsVisible="{CompiledBinding !!DownloadEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
 					<MultiBinding Converter="{x:Static BoolConverters.And}">
 						<CompiledBinding Path="!UILocked" />
-						<CompiledBinding Path="!!ProjectEntries.Count" />
+						<CompiledBinding Path="!!DownloadEntries.Count" />
 					</MultiBinding>
 				</Button.IsEnabled>
 			</Button>
-			<Button Name="export_button" Command="{CompiledBinding ExportProjectsCommand}" Content="Export Selected" IsVisible="{CompiledBinding !!ProjectEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+			<Button Name="export_button" Command="{CompiledBinding ExportProjectsCommand}" Content="Export Selected" IsVisible="{CompiledBinding !!DownloadEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
 					<MultiBinding Converter="{x:Static BoolConverters.And}">
 						<CompiledBinding Path="!UILocked" />
-						<CompiledBinding Path="!!ProjectEntries.Count" />
+						<CompiledBinding Path="!!DownloadEntries.Count" />
 					</MultiBinding>
 				</Button.IsEnabled>
 			</Button>
