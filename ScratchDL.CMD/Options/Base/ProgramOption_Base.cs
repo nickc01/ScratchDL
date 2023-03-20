@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options.Base
 {
-    public abstract class ProgramOption_Base
+    internal abstract class ProgramOption_Base
     {
         private class DownloadedComment
         {
@@ -62,25 +62,6 @@ namespace ScratchDL.CMD.Options.Base
                         await writer.WriteAsync(JsonSerializer.Serialize(downloadedComments, new JsonSerializerOptions() { WriteIndented = true }));
                     }
                 }
-
-
-
-                /*for (int i = 0; i < 100; i++)
-                {
-                    try
-                    {
-                        await File.WriteAllTextAsync(Utilities.PathAddBackslash(directory.FullName) + "comments.json", JsonSerializer.Serialize(downloadedComments, new JsonSerializerOptions() { WriteIndented = true }));
-                        break;
-                    }
-                    catch (Exception)
-                    {
-                        if (i == 99)
-                        {
-                            throw;
-                        }
-                        continue;
-                    }
-                }*/
             }
         }
 

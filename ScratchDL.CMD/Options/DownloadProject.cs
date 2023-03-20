@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-
-    public sealed class DownloadProject : ProgramOption_Base
+    internal sealed class DownloadProject : ProgramOption_Base
     {
         public override string Title => "Download Project";
         public override string Description => "Downloads a project by ID or URL";

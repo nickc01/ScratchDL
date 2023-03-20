@@ -52,8 +52,8 @@
 		</ScrollViewer>
 
 		<StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="0" Height="44" VerticalAlignment="Bottom">
-			<TextBlock Foreground="Red" Text="Login Required" IsVisible="{CompiledBinding DisplayDownloadError}" TextWrapping="WrapWithOverflow" VerticalAlignment="Center"></TextBlock>
-			<ProgressBar Value="{CompiledBinding DownloadProgress}" IsVisible="{CompiledBinding ShowDownloadProgressBar}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></ProgressBar>
+			<TextBlock Foreground="Red" Text="Login Required" IsVisible="{CompiledBinding DisplayErrorMessage}" TextWrapping="WrapWithOverflow" VerticalAlignment="Center"></TextBlock>
+			<ProgressBar Value="{CompiledBinding ProgressValue}" IsVisible="{CompiledBinding ShowProgressBar}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></ProgressBar>
 			<Button Name="download_button" Command="{CompiledBinding BeginDownloadCommand}" IsEnabled="{CompiledBinding !UILocked}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">Download</Button>
 		</StackPanel>
 
@@ -73,7 +73,6 @@
 				</DataGrid.Columns>
 			</DataGrid>
 		</Grid>
-		<!--<Button IsEnabled="{CompiledBinding !ExportConsoleVisible}" IsVisible="{CompiledBinding !ExportConsoleVisible}" Command="{CompiledBinding ClearDownloadGridCommand}" Margin="20" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Top" Grid.Row="2" Grid.Column="2">Clear</Button>-->
 		<StackPanel Orientation="Horizontal" Margin="5" Spacing="3" Grid.Row="2" Grid.Column="2" Height="44" VerticalAlignment="Bottom">
 			<Button Content="Select All" Command="{CompiledBinding SelectAllCommand}" IsVisible="{CompiledBinding !!DownloadEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
@@ -83,7 +82,7 @@
 					</MultiBinding>
 				</Button.IsEnabled>
 			</Button>
-			<Button Name="export_button" Command="{CompiledBinding ExportProjectsCommand}" Content="Export Selected" IsVisible="{CompiledBinding !!DownloadEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
+			<Button Name="export_button" Command="{CompiledBinding ExportCommand}" Content="Export Selected" IsVisible="{CompiledBinding !!DownloadEntries.Count}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Stretch">
 				<Button.IsEnabled>
 					<MultiBinding Converter="{x:Static BoolConverters.And}">
 						<CompiledBinding Path="!UILocked" />
@@ -92,10 +91,6 @@
 				</Button.IsEnabled>
 			</Button>
 		</StackPanel>
-		<!--<TextBlock Text="{CompiledBinding ExportConsoleText}" VerticalAlignment="Stretch" FontSize="16" Padding="5"/>-->
-		<!--<ScrollViewer IsVisible="{CompiledBinding ExportConsoleVisible}" Grid.Row="2" Grid.Column="2" Background="Black">
-			
-		</ScrollViewer>-->
 		<Grid IsEnabled="{CompiledBinding ExportConsoleVisible}" IsVisible="{CompiledBinding ExportConsoleVisible}" Grid.Row="2" Grid.Column="2" VerticalAlignment="Stretch" Background="Black">
 			<DataGrid Grid.Row="2" Grid.Column="2" CanUserReorderColumns="False"
 						  CanUserResizeColumns="False"

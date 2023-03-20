@@ -14,9 +14,7 @@ namespace ScratchDL.GUI.Views
 {
     public partial class MainWindow : Window
     {
-        //public static MainWindow? Instance { get; private set; }
-
-        public IDownloadModeUI[] ModeUIs;
+        public IProgramOptionView[] ModeUIs;
 
         ComboBox modeSelectionBox;
 
@@ -33,11 +31,10 @@ namespace ScratchDL.GUI.Views
             return builder.ToString();
         }
 
-        public MainWindow() : this(new MainWindowViewModel(), new List<IDownloadModeUI>()) { }
+        public MainWindow() : this(new MainWindowViewModel(), new List<IProgramOptionView>()) { }
 
-        public MainWindow(object dataContext, IEnumerable<IDownloadModeUI> modeUIs)
+        public MainWindow(object dataContext, IEnumerable<IProgramOptionView> modeUIs)
         {
-            //Instance = this;
             InitializeComponent();
 
             DataContext = dataContext;
@@ -62,7 +59,7 @@ namespace ScratchDL.GUI.Views
 
         void ExportProjects(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            ExportProjectsAsync();
+            _ = ExportProjectsAsync();
         }
 
         private async Task ExportProjectsAsync()

@@ -1,20 +1,18 @@
-﻿using ScratchDL.Enums;
-using ScratchDL.GUI.ViewModels;
+﻿using ScratchDL.GUI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace ScratchDL.GUI
 {
-    public abstract class ProjectDownloadMode : DownloadMode
+    public static class OptionUtilities
     {
-        /*class AuthorOverride : IProject
+        class AuthorOverride : IProject
         {
             string _username;
             public IProject Original { get; set; }
@@ -61,9 +59,12 @@ namespace ScratchDL.GUI
             public List<Comment>? Replies;
         }
 
-        protected ProjectDownloadMode(MainWindowViewModel viewModel) : base(viewModel) { }
+        public static Task<IProject> DownloadProject(IProject project, DownloadData data)
+        {
+            return DownloadProject(data.API, project, data.AddEntry);
+        }
 
-        protected async Task<IProject> DownloadProject(IProject? project, Action<DownloadEntry>? addEntry)
+        public static async Task<IProject> DownloadProject(ScratchAPI API, IProject project, Action<DownloadEntry>? addEntry)
         {
             if (project == null)
             {
@@ -99,12 +100,17 @@ namespace ScratchDL.GUI
             return project;
         }
 
-        protected async Task<List<IProject>> DownloadProjectBatch(IAsyncEnumerable<Project> projectDownloader, Action<DownloadEntry>? addEntry, long projectCount = 0)
+        public static Task<List<IProject>> DownloadProjectBatch(IAsyncEnumerable<Project> projects, DownloadData data, long projectCount = 0)
+        {
+            return DownloadProjectBatch(data.API, projects, data.AddEntry, data.SetProgress, projectCount);
+        }
+
+        public static async Task<List<IProject>> DownloadProjectBatch(ScratchAPI API, IAsyncEnumerable<Project> projects, Action<DownloadEntry>? addEntry, Action<double>? SetProgress = null, long projectCount = 0)
         {
             cachedUsernames.Clear();
             List<IProject> downloadedProjects = new List<IProject>();
             List<Task> usernameTasks = new List<Task>();
-            await foreach (IProject project in projectDownloader)
+            await foreach (IProject project in projects)
             {
                 Debug.WriteLine($"Found Project : {project.Title}");
 
@@ -130,7 +136,7 @@ namespace ScratchDL.GUI
                             addEntry?.Invoke(new DownloadEntry(true, newProjectInfo.ID, newProjectInfo.Title, newProjectInfo.AuthorUsername));
                             if (projectCount > 0)
                             {
-                                SetProgress(100.0 * (downloadedProjects.Count / (double)projectCount));
+                                SetProgress?.Invoke(100.0 * (downloadedProjects.Count / (double)projectCount));
                             }
                         }
 
@@ -150,32 +156,37 @@ namespace ScratchDL.GUI
                 addEntry?.Invoke(new DownloadEntry(true, project.ID, project.Title, username));
                 if (projectCount > 0)
                 {
-                    SetProgress(100.0 * (downloadedProjects.Count / (double)projectCount));
+                    SetProgress?.Invoke(100.0 * (downloadedProjects.Count / (double)projectCount));
                 }
             }
             await Task.WhenAll(usernameTasks);
             return downloadedProjects;
         }
 
-        static async Task<string?> GetUsername(Task<Project?> project)
+        static Task<string?> GetUsername(Task<Project?> project)
         {
-            return (await project)?.author.username;
+            return project.ContinueWith(t => t.Result?.author.username);
         }
 
-        protected static async Task DownloadProjectComments(ScratchAPI api, string username, long project_id, DirectoryInfo directory)
+        public static Task DownloadProjectComments(DownloadData data, string username, long project_id, DirectoryInfo directory)
+        {
+            return DownloadProjectComments(data.API, username, project_id, directory);
+        }
+
+        public static async Task DownloadProjectComments(ScratchAPI API, string username, long project_id, DirectoryInfo directory)
         {
             List<DownloadedComment> downloadedComments = new();
 
             List<Task<DownloadedComment>> commentDownloads = new();
 
-            await foreach (Comment comment in api.GetProjectComments(username, project_id))
+            await foreach (Comment comment in API.GetProjectComments(username, project_id))
             {
                 async Task<DownloadedComment> Download(Comment comment)
                 {
                     List<Comment> replies = new();
                     if (comment.reply_count > 0)
                     {
-                        await foreach (Comment reply in api.GetRepliesToComment(username, project_id, comment))
+                        await foreach (Comment reply in API.GetRepliesToComment(username, project_id, comment))
                         {
                             replies.Add(reply);
                         }
@@ -206,7 +217,7 @@ namespace ScratchDL.GUI
             }
         }
 
-        protected static long? GetProjectID(string project)
+        public static long? GetProjectID(string project)
         {
             int index = project.IndexOf("/projects/");
             if (index > -1)
@@ -221,7 +232,12 @@ namespace ScratchDL.GUI
             return null;
         }
 
-        protected async Task ExportProject(IProject project, bool downloadComments, DirectoryInfo folderPath, IEnumerable<long>? selectedIDs, Action<string> writeToConsole)
+        public static Task ExportProject(ExportData data, IProject project, bool downloadComments)
+        {
+            return ExportProject(data.API, project, downloadComments, data.FolderPath, data.SelectedIDs, data.WriteToConsole);
+        }
+
+        static async Task ExportProject(ScratchAPI API, IProject project, bool downloadComments, DirectoryInfo folderPath, IEnumerable<long>? selectedIDs, Action<string> writeToConsole)
         {
             if (selectedIDs != null && selectedIDs.Contains(project.ID))
             {
@@ -244,7 +260,12 @@ namespace ScratchDL.GUI
             }
         }
 
-        protected async Task ExportProjectBatch(List<IProject> downloadedProjects, bool downloadComments, DirectoryInfo folderPath, IEnumerable<long>? selectedIDs, Action<string> writeToConsole)
+        public static Task ExportProjectBatch(ExportData data, IEnumerable<IProject> downloadedProjects, bool downloadComments)
+        {
+            return ExportProjectBatch(data.API, downloadedProjects, downloadComments, data.FolderPath, data.SelectedIDs, data.WriteToConsole, data.SetProgress);
+        }
+
+        static async Task ExportProjectBatch(ScratchAPI API, IEnumerable<IProject> downloadedProjects, bool downloadComments, DirectoryInfo folderPath, IEnumerable<long>? selectedIDs, Action<string> writeToConsole, Action<double>? SetProgress = null)
         {
             IProject[] projectsToExport;
             if (selectedIDs != null)
@@ -273,7 +294,7 @@ namespace ScratchDL.GUI
                         }
                         var value = Interlocked.Increment(ref projectsExported);
                         writeToConsole($"✔️ Finished : {project.Title}");
-                        SetProgress(100.0 * (value / (double)projectsToExport.Length));
+                        SetProgress?.Invoke(100.0 * (value / (double)projectsToExport.Length));
                     }
                     catch (ProjectDownloadException e)
                     {
@@ -286,9 +307,11 @@ namespace ScratchDL.GUI
 
             await Task.WhenAll(exportTasks);
             Debug.WriteLine($"Done Exporting - {projectsExported} projects exported");
-        }*/
-        protected ProjectDownloadMode(MainWindowViewModel viewModel) : base(viewModel)
+        }
+
+        public static Task SerializeToFile<T>(string outputFile, T data)
         {
+            return Helpers.WriteTextToFile(outputFile, JsonSerializer.Serialize(data, new JsonSerializerOptions() { WriteIndented = true }));
         }
     }
 }

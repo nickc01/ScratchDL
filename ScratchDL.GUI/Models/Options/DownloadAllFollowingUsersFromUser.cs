@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls;
-using ScratchDL.GUI.ViewModels;
+﻿using ScratchDL.GUI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,9 +8,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ScratchDL.GUI.Modes
+namespace ScratchDL.GUI.Options
 {
-    public class DownloadAllFollowingUsersFromUser : DownloadMode
+    public class DownloadAllFollowingUsersFromUser : ProgramOption
     {
         public DownloadAllFollowingUsersFromUser(MainWindowViewModel viewModel) : base(viewModel) { }
 
@@ -62,18 +61,8 @@ namespace ScratchDL.GUI.Modes
                 Debug.WriteLine($"Done: {followingUser.username}");
                 data.WriteToConsole($"✔️ Finished : {followingUser.username}");
             }
-        }
-    }
 
-    public class DownloadAllFollowingUsersFromUserUI : DownloadModeUI<DownloadAllFollowingUsersFromUser>
-    {
-        public DownloadAllFollowingUsersFromUserUI(DownloadAllFollowingUsersFromUser modeObject) : base(modeObject) { }
-
-        public override string Column3 => string.Empty;
-
-        public override void Setup(StackPanel controlsPanel)
-        {
-            CreateAndAddTextBox(nameof(ModeObject.Username), controlsPanel);
+            await OptionUtilities.SerializeToFile(Helpers.PathAddBackslash(data.FolderPath.FullName) + "following.json", downloadedFollowing.OrderBy(p => p.username));
         }
     }
 }

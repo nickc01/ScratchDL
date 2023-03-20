@@ -11,19 +11,19 @@ using System.Reflection;
 
 namespace ScratchDL.GUI
 {
-    public abstract class DownloadModeUI<T> : IDownloadModeUI where T : DownloadMode
+    public abstract class ProgramOptionView<T> : IProgramOptionView where T : ProgramOption
     {
         public readonly T ModeObject;
 
-        DownloadMode IDownloadModeUI.ModeObject => ModeObject;
+        ProgramOption IProgramOptionView.ModeObject => ModeObject;
 
-        public DownloadModeUI(T modeObject) => ModeObject = modeObject;
+        public ProgramOptionView(T modeObject) => ModeObject = modeObject;
 
         public abstract void Setup(StackPanel controlsPanel);
 
-        Type IDownloadModeUI.ModeType => typeof(T);
+        Type IProgramOptionView.ModeType => typeof(T);
 
-        void IDownloadModeUI.Setup(StackPanel controlPanel) => Setup(controlPanel);
+        void IProgramOptionView.Setup(StackPanel controlPanel) => Setup(controlPanel);
 
         public virtual string Column1 => "ID";
         public virtual string Column2 => "Name";
@@ -207,7 +207,7 @@ namespace ScratchDL.GUI
             comboBox.SelectedIndex = defaultIndex;
             comboBox.SelectionChanged += (sender, e) =>
             {
-                onSelectionChanged((string)comboBox.SelectedItem,comboBox.SelectedIndex);
+                onSelectionChanged((string)comboBox.SelectedItem!,comboBox.SelectedIndex);
             };
 
             return comboBox;
@@ -221,23 +221,6 @@ namespace ScratchDL.GUI
         protected ComboBox CreateEnumComboBox<EnumType>(string name, EnumType defaultValue, Action<EnumType> onSelectionChange, IEnumerable<EnumType> possibleValues) where EnumType : struct, Enum
         {
             return CreateEnumComboBox(name, defaultValue, onSelectionChange, possibleValues);
-            /*var names = possibleValues.Select(v => v.ToString()).ToArray();
-            var values = possibleValues.ToArray();
-
-            var defaultName = defaultValue.ToString();
-
-            var defaultIndex = Array.IndexOf(names, defaultName);
-
-            var comboBox = new ComboBox();
-            comboBox.Name = name;
-            comboBox.Items = names.Select(n => Helpers.Prettify(n));
-            comboBox.SelectedIndex = defaultIndex;
-            comboBox.SelectionChanged += (sender, e) =>
-            {
-                onSelectionChange(values[comboBox.SelectedIndex]);
-            };
-
-            return comboBox;*/
         }
 
         protected ComboBox CreateEnumComboBox(string name, Enum defaultValue, Action<Enum> onSelectionChange, IEnumerable<Enum> possibleValues)
@@ -281,38 +264,5 @@ namespace ScratchDL.GUI
             controlsPanel.Children.Add(result);
             return result;
         }
-
-        /*protected EventHandler<KeyEventArgs> GetTextUpdateDelegate(TextBox textBox, Action<string> updateTextDelegate)
-        {
-            return (sender, e) =>
-            {
-                updateTextDelegate?.Invoke(textBox.Text);
-            };
-        }
-
-        protected EventHandler<KeyEventArgs> GetNumberUpdateDelegate(TextBox textBox, Action<int> updateNumberDelegate, int minRange = int.MinValue, int maxRange = int.MaxValue)
-        {
-            var originalText = textBox.Text;
-            return (sender, e) =>
-            {
-                if (int.TryParse(textBox.Text,out var result))
-                {
-                    if (result > maxRange)
-                    {
-                        result = maxRange;
-                    }
-                    if (result < minRange)
-                    {
-                        result = minRange;
-                    }
-                    originalText = textBox.Text;
-                    updateNumberDelegate?.Invoke(result);
-                }
-                else
-                {
-                    textBox.Text = originalText;
-                }
-            };
-        }*/
     }
 }

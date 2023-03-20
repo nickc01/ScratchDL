@@ -42,9 +42,9 @@ namespace ScratchDL.GUI.Modes
         }
     }
 
-    public class DownloadProfileInformationForUserUI : DownloadModeUI<DownloadProfileInformationForUser>
+    public class DownloadProfileInformationForUserView : DownloadModeView<DownloadProfileInformationForUser>
     {
-        public DownloadProfileInformationForUserUI(DownloadProfileInformationForUser modeObject) : base(modeObject) { }
+        public DownloadProfileInformationForUserView(DownloadProfileInformationForUser modeObject) : base(modeObject) { }
 
         public override void Setup(StackPanel controlsPanel)
         {

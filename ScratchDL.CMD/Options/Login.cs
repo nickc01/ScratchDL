@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-    public sealed class Login : ProgramOption_Base
+    internal sealed class Login : ProgramOption_Base
     {
         public override string Title => "Login";
         public override string Description => "Logs into an account. You will be able to download private details about the account";

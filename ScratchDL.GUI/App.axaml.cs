@@ -23,22 +23,22 @@ namespace ScratchDL.GUI
             {
                 var vm = new MainWindowViewModel();
 
-                var modeTypes = Assembly.GetAssembly(typeof(MainWindowViewModel))!.GetTypes().Where(t => !t.IsInterface && !t.IsAbstract && !t.ContainsGenericParameters && t != typeof(DownloadMode) && t.IsAssignableTo(typeof(DownloadMode)));
+                var modeTypes = Assembly.GetAssembly(typeof(MainWindowViewModel))!.GetTypes().Where(t => !t.IsInterface && !t.IsAbstract && !t.ContainsGenericParameters && t != typeof(ProgramOption) && t.IsAssignableTo(typeof(ProgramOption)));
 
-                List<DownloadMode> modes = new List<DownloadMode>();
+                List<ProgramOption> modes = new List<ProgramOption>();
 
                 foreach (var type in modeTypes)
                 {
-                    modes.Add((DownloadMode)Activator.CreateInstance(type, vm)!);
+                    modes.Add((ProgramOption)Activator.CreateInstance(type, vm)!);
                 }
 
-                List<DownloadMode> sortedModes = new List<DownloadMode>();
+                List<ProgramOption> sortedModes = new List<ProgramOption>();
 
-                vm.Modes = sortedModes;
+                vm.Options = sortedModes;
 
-                var modeUITypes = Assembly.GetAssembly(typeof(MainWindowViewModel))!.GetTypes().Where(t => !t.IsInterface && !t.IsAbstract && !t.ContainsGenericParameters && t != typeof(IDownloadModeUI) && t.IsAssignableTo(typeof(IDownloadModeUI)));
+                var modeUITypes = Assembly.GetAssembly(typeof(MainWindowViewModel))!.GetTypes().Where(t => !t.IsInterface && !t.IsAbstract && !t.ContainsGenericParameters && t != typeof(IProgramOptionView) && t.IsAssignableTo(typeof(IProgramOptionView)));
 
-                List<IDownloadModeUI> modeUIs = new List<IDownloadModeUI>();
+                List<IProgramOptionView> modeUIs = new List<IProgramOptionView>();
 
                 foreach (var type in modeUITypes)
                 {
@@ -49,14 +49,14 @@ namespace ScratchDL.GUI
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"{type.FullName} does not directly inherit from {IDownloadModeUI.GenericUIType}", e);
+                        throw new Exception($"{type.FullName} does not directly inherit from {IProgramOptionView.GenericUIType}", e);
                     }
 
                     var mode = modes.FirstOrDefault(m => m.GetType().IsAssignableTo(modeType));
 
                     if (mode != null)
                     {
-                        modeUIs.Add((IDownloadModeUI)Activator.CreateInstance(type, mode)!);
+                        modeUIs.Add((IProgramOptionView)Activator.CreateInstance(type, mode)!);
                         sortedModes.Add(mode);
                     }
                 }

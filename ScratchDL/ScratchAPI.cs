@@ -1529,7 +1529,7 @@ namespace ScratchDL
                 }
                 return null;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return SB2BinaryProject(data);
             }
@@ -1567,7 +1567,7 @@ namespace ScratchDL
                 {
                     json = JsonDocument.Parse(response, new JsonDocumentOptions() { MaxDepth = 20000 });
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return null;
                 }
@@ -1693,9 +1693,9 @@ namespace ScratchDL
                 try
                 {
                     Assets.Add(new PenMetaAsset(
-                            (string)json["penLayerMD5"].AsValue(),
+                            (string)json["penLayerMD5"]!.AsValue()!,
                             json,
-                            (int)json["penLayerID"].AsValue()
+                            (int)json["penLayerID"]!.AsValue()
                         ));
                 }
                 catch (Exception)
@@ -1706,11 +1706,13 @@ namespace ScratchDL
             if (json["sounds"] != null)
             {
                 int index = -1;
-                foreach (var sound in json["sounds"].AsArray())
+                foreach (var sound in json["sounds"]!.AsArray())
                 {
                     index++;
                     try
                     {
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                         Assets.Add(new SoundMetaAsset(
                             (string?)sound["md5"].AsValue(),
                             sound,
@@ -1720,21 +1722,25 @@ namespace ScratchDL
                             (int)sound["rate"].AsValue(),
                             (string?)sound["format"].AsValue()
                         ));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8604 // Possible null reference argument.
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine($"Failed to download sound : " + json["sounds"][index]!.ToString());
+                        Console.WriteLine($"Failed to download sound : " + json["sounds"]![index]!.ToString());
                     }
                 }
             }
             if (json["costumes"] != null)
             {
                 int index = -1;
-                foreach (var costume in json["costumes"].AsArray())
+                foreach (var costume in json["costumes"]!.AsArray())
                 {
                     index++;
                     try
                     {
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                         Assets.Add(new CostumeMetaAsset(
                             (string?)costume["baseLayerMD5"].AsValue(),
                             costume,
@@ -1744,19 +1750,21 @@ namespace ScratchDL
                             (int)costume["rotationCenterX"].AsValue(),
                             (int)costume["rotationCenterY"].AsValue()
                         ));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8604 // Possible null reference argument.
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine($"Failed to download costume : " + json["costumes"][index]!.ToString());
+                        Console.WriteLine($"Failed to download costume : " + json["costumes"]![index]!.ToString());
                         throw;
                     }
                 }
             }
             if (json["children"] != null)
             {
-                foreach (var child in json["children"].AsArray())
+                foreach (var child in json["children"]!.AsArray())
                 {
-                    Assets.AddRange(ScanForAssets(child));
+                    Assets.AddRange(ScanForAssets(child!));
                 }
             }
             return Assets;

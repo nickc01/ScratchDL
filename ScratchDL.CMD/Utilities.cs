@@ -17,37 +17,6 @@ public static class Utilities
 
 	public const int DEFAULT_SCAN_DEPTH = 400;
 
-	/*public static string PathAddBackslash(string path)
-	{
-		if (path == null)
-			throw new ArgumentNullException(nameof(path));
-
-		path = path.TrimEnd();
-
-		if (PathEndsWithDirectorySeparator())
-			return path;
-
-		return path + GetDirectorySeparatorUsedInPath();
-
-		bool PathEndsWithDirectorySeparator()
-		{
-			if (path.Length == 0)
-				return false;
-
-			char lastChar = path[path.Length - 1];
-			return lastChar == Path.DirectorySeparatorChar
-				|| lastChar == Path.AltDirectorySeparatorChar;
-		}
-
-		char GetDirectorySeparatorUsedInPath()
-		{
-			if (path.Contains(Path.AltDirectorySeparatorChar))
-				return Path.AltDirectorySeparatorChar;
-
-			return Path.DirectorySeparatorChar;
-		}
-	}*/
-
 	public static EnumType PickEnumOption<EnumType>(string message, IEnumerable<string>? descriptions = null) where EnumType : Enum
 	{
 		return PickEnumOption(message, (EnumType)(object)-1, descriptions);
@@ -123,7 +92,7 @@ public static class Utilities
 		}
 	}
 
-	public static ProgramOption_Base PickProgramOption(IEnumerable<ProgramOption_Base> options, ProgramOption_Base? defaultOption = null)
+    internal static ProgramOption_Base PickProgramOption(IEnumerable<ProgramOption_Base> options, ProgramOption_Base? defaultOption = null)
     {
 		Console.WriteLine();
 		ProgramOption_Base[] optionsArray = options.ToArray();
@@ -328,37 +297,4 @@ public static class Utilities
 
 		return false;
 	}
-
-	/*/// <summary>
-	/// Waits until a file is avaiable for opening, then proceeds to open it
-	/// </summary>
-	/// <param name="fileName">The file to open</param>
-	/// <param name="mode">Determines how the file should be opened</param>
-	/// <param name="accessMode">Determines if the file has read or write acess</param>
-	/// <param name="shareMode">Determines how the file can be shared with other processes</param>
-	/// <returns>Returns a stream for reading or writing to the file</returns>
-	public static async Task<FileStream> WaitTillFileAvailable(string fileName, FileMode mode, FileAccess accessMode = FileAccess.ReadWrite, FileShare shareMode = FileShare.None)
-	{
-		while (!IsFileReady(fileName, mode, accessMode, shareMode))
-		{
-			await Task.Delay(50);
-		}
-
-		return File.Open(fileName, mode, accessMode, shareMode);
-	}
-
-    static bool IsFileReady(string filename, FileMode mode, FileAccess accessMode = FileAccess.ReadWrite, FileShare shareMode = FileShare.None)
-    {
-        // If the file can be opened for exclusive access it means that the file
-        // is no longer locked by another process.
-        try
-        {
-			using (FileStream inputStream = File.Open(filename, mode, accessMode, shareMode))
-				return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }*/
 }

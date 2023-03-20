@@ -1,5 +1,4 @@
-﻿using Avalonia.Controls;
-using ScratchDL.GUI.ViewModels;
+﻿using ScratchDL.GUI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,9 +7,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ScratchDL.GUI.Modes
+namespace ScratchDL.GUI.Options
 {
-    public class DownloadAllStudiosFromUser : ProjectDownloadMode
+    public class DownloadAllStudiosFromUser : ProgramOption
     {
         public DownloadAllStudiosFromUser(MainWindowViewModel viewModel) : base(viewModel) { }
 
@@ -32,7 +31,6 @@ namespace ScratchDL.GUI.Modes
                 downloadedStudios.Add(studio);
                 data.AddEntry(new DownloadEntry(true, studio.id, studio.title, Username));
             }
-            //downloadedProjects = await DownloadDefault(API.GetCuratedStudios(Username), addEntry);
         }
 
         public override async Task Export(ExportData data)
@@ -46,29 +44,17 @@ namespace ScratchDL.GUI.Modes
                 await foreach (StudioProject project in data.API.GetProjectsInStudio(studio.ID))
                 {
                     foundProjects.Add(project);
-                    downloadTasks.Add(ModeUtilities.DownloadProject(data.API, project, null).ContinueWith(project =>
+                    downloadTasks.Add(OptionUtilities.DownloadProject(data.API, project, null).ContinueWith(project =>
                     {
-                        return ModeUtilities.ExportProject(data, project.Result, DownloadComments);
-                        //return ExportProject(project.Result, DownloadComments, studioDirectory, null, writeToConsole);
+                        return OptionUtilities.ExportProject(data, project.Result, DownloadComments);
                     }));
                 }
 
-                await Helpers.WriteTextToFile(Helpers.PathAddBackslash(studioDirectory.FullName) + "projects.json", JsonSerializer.Serialize(foundProjects.OrderBy(p => p.title).ToArray(), new JsonSerializerOptions() { WriteIndented = true }));
+                await OptionUtilities.SerializeToFile(Helpers.PathAddBackslash(data.FolderPath.FullName) + "project.json", foundProjects.OrderBy(p => p.title));
             }
 
             await Task.WhenAll(downloadTasks);
-            //await ExportDefault(downloadedProjects, DownloadComments, folderPath, selectedIDs, writeToConsole);
-        }
-    }
-
-    public class DownloadAllStudiosFromUserUI : DownloadModeUI<DownloadAllStudiosFromUser>
-    {
-        public DownloadAllStudiosFromUserUI(DownloadAllStudiosFromUser modeObject) : base(modeObject) { }
-
-        public override void Setup(StackPanel controlsPanel)
-        {
-            CreateAndAddTextBox(nameof(ModeObject.Username), controlsPanel);
-            CreateAndAddCheckbox(nameof(ModeObject.DownloadComments), controlsPanel);
+            await OptionUtilities.SerializeToFile(Helpers.PathAddBackslash(data.FolderPath.FullName) + "studios.json", downloadedStudios.OrderBy(p => p.Title));
         }
     }
 }

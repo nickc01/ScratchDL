@@ -12,11 +12,11 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.GUI
 {
-    public abstract class DownloadMode
+    public abstract class ProgramOption
     {
         public readonly MainWindowViewModel ViewModel;
 
-        public DownloadMode(MainWindowViewModel viewModel)
+        public ProgramOption(MainWindowViewModel viewModel)
         {
             ViewModel = viewModel;
         }
@@ -24,16 +24,6 @@ namespace ScratchDL.GUI
         public abstract string Name { get; }
 
         public abstract string Description { get; }
-
-        /*public ScratchAPI API { get; private set; }
-
-        public Action<double> SetProgress { get; private set; }
-
-        public void Configure(ScratchAPI api, Action<double> setProgress)
-        {
-            API = api;
-            SetProgress = setProgress;
-        }*/
 
         public abstract Task Download(DownloadData data);
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-    public sealed class DownloadUserProjects : ProgramOption_Base
+    internal sealed class DownloadUserProjects : ProgramOption_Base
     {
         public override string Title => "Download User Projects";
         public override string Description => "Downloads all projects from a user";

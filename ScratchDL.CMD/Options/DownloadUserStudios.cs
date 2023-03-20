@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-    public sealed class DownloadUserStudios : ProgramOption_Base
+    internal sealed class DownloadUserStudios : ProgramOption_Base
     {
         public override string Title => "Download User Studios";
         public override string Description => "Downloads all the studios a user has created";

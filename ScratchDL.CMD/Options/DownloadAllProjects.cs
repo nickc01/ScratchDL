@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-    public sealed class DownloadAllProjects : ProgramOption_Base
+    internal sealed class DownloadAllProjects : ProgramOption_Base
     {
         public override string Title => "Download All Projects (Requires Login)";
 

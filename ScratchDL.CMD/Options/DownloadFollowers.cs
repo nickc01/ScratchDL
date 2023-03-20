@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-    public sealed class DownloadFollowers : ProgramOption_Base
+    internal sealed class DownloadFollowers : ProgramOption_Base
     {
         public override string Title => "Download Followers";
 

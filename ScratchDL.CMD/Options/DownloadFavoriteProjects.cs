@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-    public sealed class DownloadFavoriteProjects : ProgramOption_Base
+    internal sealed class DownloadFavoriteProjects : ProgramOption_Base
     {
         public override string Title => "Download Favorite Projects";
         public override string Description => "Downloads all favorite projects from a user";

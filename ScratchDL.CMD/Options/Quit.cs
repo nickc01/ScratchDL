@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ScratchDL.CMD.Options
 {
-    public sealed class Quit : ProgramOption_Base
+    internal sealed class Quit : ProgramOption_Base
     {
         public override string Title => "Quit";
         public override string Description => "Quits the program";

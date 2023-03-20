@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace ScratchDL.GUI
 {
-    public interface IDownloadModeUI
+    public interface IProgramOptionView
     {
         static Type? _genericUIType;
         public static Type GenericUIType => _genericUIType ??= typeof(MainWindowViewModel).GetNestedTypes().First();
 
-        DownloadMode ModeObject { get; }
+        ProgramOption ModeObject { get; }
 
         Type ModeType { get; }
 
