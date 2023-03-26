@@ -16,21 +16,6 @@ namespace ScratchDL.GUI.Views
     {
         public IProgramOptionView[] ModeUIs;
 
-        ComboBox modeSelectionBox;
-
-        static string Prettify(string input)
-        {
-            StringBuilder builder = new (input);
-            for (int index = 0; index < builder.Length - 1; index++)
-            {
-                if (char.IsLower(builder[index]) && char.IsUpper(builder[index + 1]))
-                {
-                    builder.Insert(index + 1, ' ');
-                }
-            }
-            return builder.ToString();
-        }
-
         public MainWindow() : this(new MainWindowViewModel(), new List<IProgramOptionView>()) { }
 
         public MainWindow(object dataContext, IEnumerable<IProgramOptionView> modeUIs)
@@ -41,20 +26,12 @@ namespace ScratchDL.GUI.Views
 
             ModeUIs = modeUIs.ToArray();
 
-            modeSelectionBox = this.FindControl<ComboBox>("mode_selection");
+            mode_selection.SelectionChanged += SelectionChanged;
+            mode_selection.Items = ModeUIs.Select(ui => ui.ModeObject?.Name ?? "UNKNOWN");
+            mode_selection.SelectedIndex = 0;
 
-            modeSelectionBox.SelectionChanged += SelectionChanged;
-
-            modeSelectionBox.Items = ModeUIs.Select(ui => ui.ModeObject?.Name ?? "UNKNOWN");
-            modeSelectionBox.SelectedIndex = 0;
-
-            var modeControlsSection = this.FindControl<StackPanel>("mode_controls_section");
-
-            var loginButton = this.FindControl<Button>("login_button");
-            loginButton.Click += DisplayLoginWindow;
-
-            var exportButton = this.FindControl<Button>("export_button");
-            exportButton.Click += ExportProjects;
+            login_button.Click += DisplayLoginWindow;
+            export_button.Click += ExportProjects;
         }
 
         void ExportProjects(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -84,24 +61,20 @@ namespace ScratchDL.GUI.Views
 
         private void SelectionChanged(object? sender, SelectionChangedEventArgs e)
         {
-            Debug.WriteLine("Selection Changed to = " + modeSelectionBox.SelectedIndex);
-            //TODO - RUN THE UI MODE TO SETUP GUI, and also run any code in the View Model too
+            var modeUI = ModeUIs[mode_selection.SelectedIndex];
 
-            var modeUI = ModeUIs[modeSelectionBox.SelectedIndex];
-
-            var modeControlsSection = this.FindControl<StackPanel>("mode_controls_section");
-            modeControlsSection.Children.Clear();
+            mode_controls_section.Children.Clear();
 
             var descriptionBlock = new TextBlock();
             descriptionBlock.Text = modeUI.ModeObject.Description + '\n';
 
-            modeControlsSection.Children.Add(descriptionBlock);
+            mode_controls_section.Children.Add(descriptionBlock);
 
             MyDataGrid.Columns[0].Header = modeUI.Column1;
             MyDataGrid.Columns[0].Header = modeUI.Column2;
             MyDataGrid.Columns[0].Header = modeUI.Column3;
 
-            modeUI.Setup(modeControlsSection);
+            modeUI.Setup(mode_controls_section);
         }
 
         /*protected override void OnClosed(EventArgs e)

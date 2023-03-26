@@ -399,7 +399,7 @@ namespace ScratchDL
         /// <summary>
         /// Uses scratch's "Explore" feature to explore for certain types of projects
         /// </summary>
-        /// <param name="keyword">The keyword to search for. Valid keywords are "all, animations, art, games, music, stories, tutorials"</param>
+        /// <param name="keyword">The keyword to search for. Other valid keywords are "all, animations, art, games, music, stories, tutorials"</param>
         /// <param name="searchMode">How the keywords should be searched. Valid modes are "trending, popular, recent"</param>
         /// <param name="language">The language the results should be in</param>
         public IAsyncEnumerable<Project> ExploreProjects(string keyword = "all", SearchMode searchMode = SearchMode.Popular, string language = "en")
@@ -408,6 +408,7 @@ namespace ScratchDL
             {
                 keyword = "*";
             }
+            Debug.WriteLine($"https://api.scratch.mit.edu/explore/projects?language={language.ToLower()}&mode={searchMode.ToString().ToLower()}&q={keyword.ToLower()}");
 
             return DownloadList<Project>($"https://api.scratch.mit.edu/explore/projects?language={language.ToLower()}&mode={searchMode.ToString().ToLower()}&q={keyword.ToLower()}", 40);
         }
@@ -448,28 +449,6 @@ namespace ScratchDL
         public IAsyncEnumerable<Studio> SearchStudios(string searchTerm, SearchMode searchMode = SearchMode.Popular, string language = "en")
         {
             return DownloadList<Studio>($"https://api.scratch.mit.edu/search/studios?language={language.ToLower()}&mode={searchMode.ToString().ToLower()}&q={searchTerm}", 40);
-        }
-
-        /// <summary>
-        /// Gets the total amount of projects that have been uploaded to scratch. Returns null if the data couldn't be retrieved
-        /// </summary>
-        public async Task<long?> GetEntireSiteProjectCount()
-        {
-            var result = await DownloadData("https://api.scratch.mit.edu/projects/count/all");
-            if (result == null)
-            {
-                return null;
-            }
-            using var obj = await JsonDocument.ParseAsync(await result.Content.ReadAsStreamAsync());
-
-            if (obj.RootElement.TryGetProperty("count", out var countObj) && countObj.TryGetInt64(out var count))
-            {
-                return count;
-            }
-            return null;
-
-            //var obj = JObject.Parse(await result.Content.ReadAsStringAsync());
-            //return obj["count"]?.Value<long>();
         }
 
         #endregion
@@ -625,21 +604,6 @@ namespace ScratchDL
                 Debug.WriteLine($"Failed to download site data for user {username}, {e}");
                 return Task.FromResult<string?>(null);
             }
-            /*try
-            {
-                using (var siteStream = await DownloadFromURL($"https://scratch.mit.edu/users/{username}/"))
-                {
-                    using (var reader = new StreamReader(siteStream))
-                    {
-                        return await reader.ReadToEndAsync();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine($"Failed to download site data for user {username}, {e}");
-                return null;
-            }*/
         }
 
         async Task<string?> DownloadWebSite(string url)
@@ -881,12 +845,26 @@ namespace ScratchDL
                     else
                     {
                         int pageNumber = offset / limit;
-                        return $"{url}?page={pageNumber + 1}&ascsort=&descsort=";
+                        if (url.Contains('?'))
+                        {
+                            return $"{url}&page={pageNumber + 1}&ascsort=&descsort=";
+                        }
+                        else
+                        {
+                            return $"{url}?page={pageNumber + 1}&ascsort=&descsort=";
+                        }
                     }
                 }
                 else
                 {
-                    return $"{url}?offset={offset}&limit={limit}";
+                    if (url.Contains('?'))
+                    {
+                        return $"{url}&offset={offset}&limit={limit}";
+                    }
+                    else
+                    {
+                        return $"{url}?offset={offset}&limit={limit}";
+                    }
                 }
             }
 
