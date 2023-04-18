@@ -2,7 +2,7 @@
 {
     public record class StudioStatus
     (
-        string datetime_created,
+        DateTime datetime_created,
         string id,
         long actor_id,
         long project_id,
