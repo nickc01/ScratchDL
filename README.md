@@ -1,3 +1,4 @@
+![Main Logo](https://nickc01.github.io/ScratchDL/images/logo.png)
 # ScratchDL
 A .Net Library and Tool for downloading data from the Scratch Website
 You can use this to do things such as:
@@ -20,3 +21,4 @@ dotnet build
 
 dotnet run ScratchDL.GUI
 ```
+![Screenshot](https://nickc01.github.io/ScratchDL/images/scratch-dl-blank.png)
