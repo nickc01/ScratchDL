@@ -1161,7 +1161,7 @@ namespace ScratchDL
             }
             else
             {
-                return DownloadProject(info.id, info.author.username, info.project_token);
+                return DownloadProject(info.id, info.project_token, info.author.username);
             }
         }
 
@@ -1203,7 +1203,7 @@ namespace ScratchDL
 
             if (projectData == null)
             {
-                throw new ProjectDownloadException(projectID, $"Unable to download project files for {projectID}. Either the project isn't public, or the project ID is invalid");
+                throw new ProjectDownloadException(projectID, $"Unable to download project files for {projectID}:{project_token}. Either the project isn't public, or the project ID is invalid");
             }
 
             using (projectData)
