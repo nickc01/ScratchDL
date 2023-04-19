@@ -1,0 +1,762 @@
+{
+  "homepages": [],
+  "source_base_path": "/home/runner/work/ScratchDL/ScratchDL/docs",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.CheckUsernameResponse.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.CheckUsernameResponse.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Comment.Author.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Comment.Author.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Comment.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Comment.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.CostumeMetaAsset.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.CostumeMetaAsset.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.DownloadedProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.DownloadedProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Enums.DownloadComments.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Enums.DownloadComments.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Enums.ProjectType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Enums.ProjectType.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Enums.ScanType.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Enums.ScanType.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Enums.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Enums.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Featured.CommunityFeaturedStudio.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Featured.CommunityFeaturedStudio.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Featured.CuratorTopProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Featured.CuratorTopProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Featured.FeaturedData.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Featured.FeaturedData.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Featured.FeaturedProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Featured.FeaturedProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Featured.MostRemixedProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Featured.MostRemixedProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Featured.ScratchDesignStudioProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Featured.ScratchDesignStudioProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Featured.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Featured.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.FeaturedProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.FeaturedProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.GalleryProject.Creator.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.GalleryProject.Creator.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.GalleryProject.Fields.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.GalleryProject.Fields.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.GalleryProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.GalleryProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Health.Cache.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Health.Cache.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Health.Database.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Health.Database.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Health.SQLInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Health.SQLInfo.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Health.SSL.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Health.SSL.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Health.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Health.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Helpers.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Helpers.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.IProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.IProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.IStudio.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.IStudio.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.LoginException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.LoginException.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.LoginInfo.Flags.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.LoginInfo.Flags.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.LoginInfo.Permissions.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.LoginInfo.Permissions.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.LoginInfo.UserInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.LoginInfo.UserInfo.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.LoginInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.LoginInfo.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.MetaAsset.Comparer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.MetaAsset.Comparer.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.MetaAsset.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.MetaAsset.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.News.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.News.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.NoInternetException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.NoInternetException.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.PenMetaAsset.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.PenMetaAsset.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Project.Author.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Project.Author.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Project.Profile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Project.Profile.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Project.ProjectHistory.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Project.ProjectHistory.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Project.ProjectRemix.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Project.ProjectRemix.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Project.ProjectStats.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Project.ProjectStats.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Project.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Project.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.ProjectComment.Author.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.ProjectComment.Author.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.ProjectComment.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.ProjectComment.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.ProjectDownloadException.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.ProjectDownloadException.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB1Project.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB1Project.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB2File.Comparer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB2File.Comparer.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB2File.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB2File.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB2Project.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB2Project.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB3Project.SB3File.Comparer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB3Project.SB3File.Comparer.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB3Project.SB3File.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB3Project.SB3File.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB3Project.SB3JsonElementDistict.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB3Project.SB3JsonElementDistict.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SB3Project.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SB3Project.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.ScratchAPI.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.ScratchAPI.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SearchMode.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SearchMode.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.SoundMetaAsset.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.SoundMetaAsset.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Studio.History.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Studio.History.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.Studio.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.Studio.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.StudioProject.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.StudioProject.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.StudioStatus.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.StudioStatus.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.User.History.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.User.History.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.User.Profile.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.User.Profile.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.User.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.User.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.UserStudio.Fields.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.UserStudio.Fields.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.UserStudio.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.UserStudio.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/ScratchDL.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/ScratchDL.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "api/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "api/index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html"
+        },
+        ".json": {
+          "relative_path": "api/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "articles/intro.md",
+      "output": {
+        ".html": {
+          "relative_path": "articles/intro.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "articles/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "articles/toc.html"
+        },
+        ".json": {
+          "relative_path": "articles/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
