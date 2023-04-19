@@ -1,3 +1,4 @@
+![Logo](~/images/logo.png)
 # ScratchDL
 A .Net Library and Tool for downloading data from the Scratch Website
 You can use this to do things such as:
