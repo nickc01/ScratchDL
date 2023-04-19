@@ -535,6 +535,7 @@ namespace ScratchDL.Tests
             Project? projectInfo = await API.GetProjectInfo(788908450);
             DirectoryInfo outputDirectory = new DirectoryInfo(Path.Combine(tempFolder.FullName, "output2"));
 
+            Assert.NotNull(projectInfo);
 
             DirectoryInfo result = await API.DownloadAndExportProject(projectInfo, outputDirectory);
 
@@ -568,6 +569,8 @@ namespace ScratchDL.Tests
         {
             Project? projectInfo = await API.GetProjectInfo(10128407);
 
+            Assert.NotNull(projectInfo);
+
             DownloadedProject downloadedProject = await API.DownloadProject(projectInfo);
 
             Assert.NotNull(downloadedProject);
@@ -585,6 +588,8 @@ namespace ScratchDL.Tests
         public async Task DownloadProject_ByProjectInfo_ShouldSaveToDisk()
         {
             Project? projectInfo = await API.GetProjectInfo(10128407);
+
+            Assert.NotNull(projectInfo);
 
             DownloadedProject downloadedProject = await API.DownloadProject(projectInfo);
 
@@ -656,6 +661,7 @@ namespace ScratchDL.Tests
             long projectId = 823872487;
             Project? info = await API.GetProjectInfo(projectId);
 
+            Assert.NotNull(info);
 
             Stream? stream = await API.DownloadProjectImage(info);
 
