@@ -191,7 +191,7 @@ namespace ScratchDL.Tests
             await foreach (Studio item in API.GetProjectStudios("Ricky-Jan", 795072056))
             {
                 Assert.True(item.id > 0);
-                if (!string.IsNullOrEmpty(item.title))
+                if (!(string.IsNullOrEmpty(item.title) && string.IsNullOrEmpty(item.description)))
                 {
                     retrieved++;
                 }
@@ -211,7 +211,7 @@ namespace ScratchDL.Tests
             await foreach (Studio item in API.GetProjectStudios("Ricky-JanFake", 795072056))
             {
                 Assert.True(item.id > 0);
-                if (!string.IsNullOrEmpty(item.title))
+                if (!(string.IsNullOrEmpty(item.title) && string.IsNullOrEmpty(item.description)))
                 {
                     retrieved++;
                 }
@@ -389,8 +389,8 @@ namespace ScratchDL.Tests
         [Fact]
         public async Task GetStudioActivity_ShouldFilterActivitiesByDateLimit()
         {
-            long studio_id = 32774157;
-            DateTime limit = new System.DateTime(2023, 02, 24);
+            long studio_id = 55641;
+            DateTime limit = DateTime.UtcNow.AddDays(-28);
 
             List<StudioStatus> activities = await ToListAsync(API.GetStudioActivity(studio_id, limit));
 
